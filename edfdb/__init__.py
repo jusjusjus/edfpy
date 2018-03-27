@@ -1,13 +1,8 @@
 
-import os
 import logging
 import numpy as np
-from struct import Struct
-from .notation import Label
+from os import SEEK_SET
 from .header import Header, ChannelHeader
-from datetime import datetime
-from collections import defaultdict
-from multipledispatch import dispatch
 
 
 class EDF(Header):
@@ -84,7 +79,6 @@ class Blob:
         self.offset = offset
         self.dtype = '<i%i'%self._bytes_per_sample
 
-    @dispatch(slice)
     def __getitem__(self, sl):
         """Return data contained in the records of `sl`.
         
@@ -102,7 +96,7 @@ class Blob:
         offset = int(b*start*n + self.offset)
         readsize = int(b*ds*n)
         shp = (ds, n)
-        self.file.seek(offset, os.SEEK_SET)
+        self.file.seek(offset, SEEK_SET)
         data = np.fromstring(self.file.read(readsize),
                 dtype=self.dtype).reshape(shp)
         return [data[:, u:v].flatten() for u, v in self.channel_locs]

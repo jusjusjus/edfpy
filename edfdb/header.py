@@ -1,13 +1,10 @@
 
-import os
 import logging
 import numpy as np
+from os import SEEK_SET
 from struct import Struct
 from .notation import Label
 from datetime import datetime
-from collections import defaultdict
-from multipledispatch import dispatch
-from fastcache import clru_cache 
 
 
 default_dtype = np.float32
@@ -160,7 +157,7 @@ class Header:
     @classmethod
     def read_file(cls, filename):
         fo = cls.open_if_string(filename, 'rb')
-        fo.seek(0, os.SEEK_SET)
+        fo.seek(0, SEEK_SET)
 
         data = fo.read(256)
         values = Struct(cls._format_str).unpack(data)
@@ -200,7 +197,7 @@ class Header:
         blob, format_str = self.to_bytes()
         # print(len(blob), format_str)
         packed = Struct(format_str).pack(*blob)
-        fo.seek(0, os.SEEK_SET)
+        fo.seek(0, SEEK_SET)
         fo.write(packed)
         if isinstance(filename, str):
             fo.close()

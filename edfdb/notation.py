@@ -176,8 +176,6 @@ for channel_type, channels in channel_labels_by_type.items():
     channel_type_by_label.update({ch.upper(): channel_type for ch in channels})
 
 
-channel_type_pattern = re.compile(r'(EEG|ECG|EMG|EOG|HR|RESP|POS|BLOODGAS|SNORE|LEG)')
-
 
 
 def cached_property(fn):
@@ -192,11 +190,13 @@ def cached_property(fn):
 
 class Label(str):
 
+
     valid_types = [
         'EEG', 'ECG', 'EMG',
         'EOG', 'HR', 'RESP', 'POS',
         'BLOODGAS', 'SNORE', 'LEG'
     ]
+    channel_type_pattern = re.compile(r'(%s)'%'|'.join(valid_types))
 
     def __new__(cls, label):
         return super().__new__(cls, cls.normalize(label))
@@ -232,7 +232,7 @@ class Label(str):
         if prefix in self.valid_types:
             return prefix
         else:
-            m = channel_type_pattern.match(original)
+            m = self.channel_type_pattern.match(original)
             if m is not None:
                 return m.group(0)
 
