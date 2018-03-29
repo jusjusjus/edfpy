@@ -37,7 +37,7 @@ class Header:
 
     @property
     def startdate(self):
-        """Local start date of the start"""
+        """Local start date of the recording"""
         return self._startdate
     
     @startdate.setter
@@ -47,7 +47,7 @@ class Header:
 
     @property
     def starttime(self):
-        """Approximate local start time of the recording"""
+        """Local start time of the recording"""
         return self._starttime
     
     @starttime.setter

@@ -12,6 +12,11 @@ class EDF(Header):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    @property
+    def duration(self):
+        """Total duration of the recording in seconds."""
+        return self.record_duration * self.num_records
+
     def get_digital_samples(self, t0=0.0, dt=None):
         """Return digital samples from `t0` to `t0+dt`."""
         sr = self.sampling_rate_by_channel
