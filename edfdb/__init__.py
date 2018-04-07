@@ -50,8 +50,14 @@ class EDF(Header):
             a dict by channel label of the numpy.arrays with the data.
         """
         data = self.get_digital_samples(t0, dt)
-        ch = (self.channel_by_label[c] for c in channels) if channels else self.channels
-        return {c.label: c.digital2physical(data) for c in ch}
+        if channels is None:
+            return {c.label: c.digital2physical(data) for c in self.channels}
+        else:
+            # Returns a channel, but with a potentially different label
+            return {
+                c: self.channel_by_label[c].digital2physical(data)
+                for c in channels if c in self.channel_by_label
+            }
 
     def set_blob(self, fo):
         s = list(self.samples_per_record_by_channel)
