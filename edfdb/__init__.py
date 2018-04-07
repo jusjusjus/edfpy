@@ -49,14 +49,9 @@ class EDF(Header):
         Returns:`
             a dict by channel label of the numpy.arrays with the data.
         """
-        if channels is None:
-            channels = self.channels
-        else:
-            channels = [(l, self.channel_by_label[l]) for l in channels]
         data = self.get_digital_samples(t0, dt)
-        return {
-            l: c.digital2physical(data) for l, c in channels
-        }
+        ch = (self.channel_by_label[c] for c in channels) if channels else self.channels
+        return {c.label: c.digital2physical(data) for c in ch}
 
     def set_blob(self, fo):
         s = list(self.samples_per_record_by_channel)
@@ -69,6 +64,14 @@ class EDF(Header):
             channel_locs,
             self.num_header_bytes
         )
+
+    def write_file(self, filename, channels=None):
+        fo = super().write_file(filename, close=False, channels=channels)
+        idx = [i for i, c in enumerate(self.channels) if c.label in channels] if channels else None
+        blob = self.blob.read(channel_indices=idx)
+        fo.write(blob)
+        if isinstance(filename, str):
+            fo.close()
 
 
 
@@ -105,6 +108,17 @@ class Blob:
         data = np.fromstring(self.file.read(readsize),
                 dtype=self.dtype).reshape(shp)
         return [data[:, u:v].flatten() for u, v in self.channel_locs]
+
+    def read(self, channel_indices=None):
+        idx = channel_indices if channel_indices else np.arange(len(self.channel_locs))
+        shp = (self.records, self.samples_per_record)
+        self.file.seek(self.offset, SEEK_SET)
+        data = np.fromstring(self.file.read(), dtype=self.dtype).reshape(shp)
+        blob = np.concatenate([
+            data[:, u:v] for i, (u, v) in enumerate(self.channel_locs)
+            if i in idx
+        ], axis=1)
+        return blob.tostring()
 
     def __del__(self):
         self.file.close()

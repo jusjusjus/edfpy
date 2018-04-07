@@ -29,6 +29,8 @@ class Header:
 
     # format_str = ''.join(str(size) + 's' for _, _, size in fields_rec.bytesize)
     _format_str = '8s80s80s8s8s8s44s8s8s4s'
+    # _num_header_bytes = sum(c for _,_,c in _fields)
+    _num_header_bytes = 256
 
     def __init__(self, *args, **kwargs):
         self.datetime_changed = True
@@ -131,7 +133,7 @@ class Header:
                 val = self.normalize(typ, val)
                 setattr(channels[i], field, val)
             offset += num_bytes
-        assert offset == self.num_header_bytes, 'invalid header'
+        assert offset == self.num_header_bytes, 'invalid header of size %i [%i]'%(offset, self.num_header_bytes)
 
         # Add some redundance for fast access
         for key in ('record_duration', 'num_records'):
@@ -171,36 +173,50 @@ class Header:
         instance.set_blob(fo)
         return instance
 
-    @classmethod
-    def as_bytes(cls, val):
-        """Converts the `str` representation of value `val` to a `bytes` instance."""
-        return bytes(str(val), 'latin1')
+    def as_bytes(self, key, num_bytes=None):
+        """Converts the `str` representation of value `self.key` to a `bytes` instance."""
+        fstring = "{:<%i}"%num_bytes if num_bytes else "{}"
+        return bytes(fstring.format(getattr(self, key)), 'latin1')
 
-    def to_bytes(self):
+    @property
+    def num_header_bytes(self):
+        return self._num_header_bytes + self.num_channels * ChannelHeader._num_header_bytes
+    
+    @num_header_bytes.setter
+    def num_header_bytes(self, _):
+        pass
+
+    def to_bytes(self, channels=None):
+        channels = [self.channel_by_label[c] for c in channels] if channels else self.channels
+        # Temporarily change `self.num_channels`
+        tmp_num_ch = self.num_channels
+        self.num_channels = len(channels)
         # Main header
         ret = [
-            self.as_bytes(getattr(self, key))
-            for key, _, _ in self._fields
+            self.as_bytes(key, num_bytes)
+            for key, _, num_bytes in self._fields
         ]
         # Channel headers
         channel_format_str = ''
         for key, _, size in ChannelHeader._fields:
             channel_format_str += (str(size)+'s')*self.num_channels
             ret += [
-                self.as_bytes(getattr(channel, key))
-                for channel in self.channels
+                channel.as_bytes(key, num_bytes=size)
+                for channel in channels
             ]
+        # Change `self.num_channels` back to original
+        self.num_channels = tmp_num_ch
         return ret, self._format_str + channel_format_str
 
-    def write_file(self, filename):
+    def write_file(self, filename, close=True, channels=None):
         fo = self.open_if_string(filename, 'wb')
-        blob, format_str = self.to_bytes()
-        # print(len(blob), format_str)
+        blob, format_str = self.to_bytes(channels=channels)
         packed = Struct(format_str).pack(*blob)
         fo.seek(0, SEEK_SET)
         fo.write(packed)
-        if isinstance(filename, str):
+        if isinstance(filename, str) and close:
             fo.close()
+        return fo
 
     @staticmethod
     def open_if_string(f, mode):
@@ -243,6 +259,9 @@ class ChannelHeader:
         ('num_samples_per_record', int  , 8 ),
         ('reserved'              , str  , 32)
     ]
+
+    # _num_channel_header_bytes = sum(c for _,_,c in _fields)
+    _num_header_bytes = 256
 
     def __init__(self, specifier):
         """
@@ -329,6 +348,11 @@ class ChannelHeader:
         assert s is not None
         return dtype(self.scale)*(data[s].astype(dtype) + dtype(self.offset))
 
+    def as_bytes(self, key, num_bytes=None):
+        """Converts the `str` representation of value `self.key` to a `bytes` instance."""
+        fstring = "{:<%i}"%num_bytes if num_bytes else "{}"
+        return bytes(fstring.format(getattr(self, key)), 'latin1')
+
     def to_bytes(self, key):
         att = getattr(self, key)
         if typ is str:
@@ -348,3 +372,4 @@ class ChannelHeader:
 
     def _repr_html_(self):
         return ''.join(['<p>%s</p>'%s for s in self.to_string_list()])
+
