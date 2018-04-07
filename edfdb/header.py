@@ -187,7 +187,11 @@ class Header:
         pass
 
     def to_bytes(self, channels=None):
-        channels = [self.channel_by_label[c] for c in channels] if channels else self.channels
+        if channels is not None:
+            channels = sorted([self.channel_by_label[c] for c in channels],
+                    key=lambda c: c.specifier)
+        else:
+            channels = self.channels
         # Temporarily change `self.num_channels`
         tmp_num_ch = self.num_channels
         self.num_channels = len(channels)
