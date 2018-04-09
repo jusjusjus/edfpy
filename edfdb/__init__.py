@@ -24,8 +24,8 @@ class EDF(Header):
         if dt is None:
             dt = self.num_records*self.record_duration
         # start/stop samples per channel
-        a = (t0*sr).astype(int)
-        b = ((t0+dt)*sr).astype(int)
+        a = np.round(t0*sr).astype(int)
+        b = np.round((t0+dt)*sr).astype(int)
         # start/stop record enclosing (min(a), max(b))
         A = np.floor(a/n).astype(int).min()
         B = np.ceil(b/n).astype(int).max()
