@@ -250,7 +250,7 @@ class Label(str):
         return self.right
 
     def __sub__(self, right):
-        assert right.is_type(self.type), "Illigal sub (%s[%s])-(%s[%s])"% \
+        assert right.is_type(self.type), "Illegal sub (%s[%s])-(%s[%s])"% \
                 (self, self.type, right, right.type)
         if self.right == right.right:
             return type(self)(self.left+'-'+right.left)

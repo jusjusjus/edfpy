@@ -156,6 +156,9 @@ class Header:
         ])
         self.channel_by_label = {c.label : c for c in channels}
 
+    def set_blob(self, fo):
+        pass
+
     @classmethod
     def read_file(cls, filename):
         fo = cls.open_if_string(filename, 'rb')
