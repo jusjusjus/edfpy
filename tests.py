@@ -26,13 +26,18 @@ def test_notation_label_difference():
     diff = l1-l2
     assert diff.is_type(l1.type)
     assert diff == 'C4-C3'
-    # atypical rereferencing
-    l1, l2 = Label('C4-M2'), Label('C3-M1')
-    diff = l1-l2
-    assert diff.is_type(l1.type), diff.type
-    assert diff == 'C4-M2-C3-M1', diff
     # rereference with REF-type channel
     l1, l2 = Label('C4-M2'), Label('M1-M2')
+    diff = l1-l2
+    assert diff.is_type(l1.type)
+    assert diff == 'C4-M1'
+    # empty reference channel
+    l1, l2 = Label('C4'), Label('C3')
+    diff = l1-l2
+    assert diff.is_type(l1.type)
+    assert diff == 'C4-C3'
+    # empty reference channel
+    l1, l2 = Label('C4'), Label('M1')
     diff = l1-l2
     assert diff.is_type(l1.type)
     assert diff == 'C4-M1'

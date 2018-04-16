@@ -246,14 +246,15 @@ class Label(str):
         return self.right
 
     def __sub__(self, right):
-        assert right.is_type(self.type), "Illegal sub (%s[%s])-(%s[%s])"% \
+        assert right.is_type(self.type), "illegal sub (%s[%s])-(%s[%s])"% \
                 (self, self.type, right, right.type)
         if self.right == right.right:
-            return type(self)(self.left+'-'+right.left)
+            lr = self.left, right.left
         elif self.left == right.left:
-            return type(self)(right.right+'-'+self.right)
+            lr = right.right, self.right
         else:
             raise AssertionError("no matching channel in derivations [%s, %s]"%(self, right))
+        return type(self)('%s-%s'%lr)
         
     def __str__(self):
         return self
