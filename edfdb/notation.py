@@ -258,3 +258,15 @@ class Label(str):
         
     def __str__(self):
         return self
+
+
+_conversion_map = {
+    'uVuV': 1.0,
+    'mVmV': 1.0,
+    'uVmV': 10**-3,
+    'mVuV': 10**3
+}
+
+def convert_units(in_unit, out_unit):
+    return _conversion_map[in_unit+out_unit]
+

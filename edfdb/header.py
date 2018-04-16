@@ -3,7 +3,7 @@ import logging
 import numpy as np
 from os import SEEK_SET
 from struct import Struct
-from .notation import Label
+from .notation import Label, convert_units
 from datetime import datetime
 from collections import defaultdict
 
@@ -299,6 +299,8 @@ class ChannelHeader:
         self._num_samples = None
         self._offset = None
         self._scale = None
+        self._output_physical_dimension = None
+        self.unit_scale = 1.0
 
     @property
     def label(self):
@@ -341,7 +343,16 @@ class ChannelHeader:
     
     @physical_dimension.setter
     def physical_dimension(self, v):
-        self._physical_dimension = v
+        self._physical_dimension = v.strip()
+
+    @property
+    def output_physical_dimension(self):
+        return self._output_physical_dimension if self._output_physical_dimension else self.physical_dimension
+
+    @output_physical_dimension.setter
+    def output_physical_dimension(self, v):
+        self._output_physical_dimension = v
+        self.unit_scale = convert_units(self.physical_dimension, self._output_physical_dimension)
 
     @property
     def prefiltering(self):
@@ -374,8 +385,8 @@ class ChannelHeader:
 
     def digital2physical(self, data, dtype=default_dtype, specifier=None):
         s = self.specifier if specifier is None else specifier
-        assert s is not None
-        return dtype(self.scale)*(data[s].astype(dtype) + dtype(self.offset))
+        assert s is not None, "channel index for edf record column missing"
+        return dtype(self.unit_scale)*dtype(self.scale)*(data[s].astype(dtype) + dtype(self.offset))
 
     def as_bytes(self, key, num_bytes=None):
         """Converts the `str` representation of value `self.key` to a `bytes` instance."""
@@ -384,10 +395,7 @@ class ChannelHeader:
 
     def to_bytes(self, key):
         att = getattr(self, key)
-        if typ is str:
-            b = bytes(att, 'latin1')
-        else:
-            b = bytes(att)
+        b = bytes(att, 'latin1') if typ is str else bytes(att)
         return b
 
     def to_string_list(self):
@@ -403,8 +411,7 @@ class ChannelHeader:
         return ''.join(['<p>%s</p>'%s for s in self.to_string_list()])
 
     def check_compatible(self, other):
-        # assert self is not other, "'%s' is '%s'"%(self.label, other.label)
-        for prop in ('sampling_rate', 'physical_dimension'):
+        for prop in ('sampling_rate', 'output_physical_dimension'):
             assert getattr(self, prop) == getattr(other, prop), \
                     "'%s' and '%s' differ in '%s'"%(self.label, other.label, prop)
 
@@ -421,7 +428,7 @@ class ChannelDifference:
         self.label = left.label-right.label
 
     def check_compatible(self, other):
-        # assert other is not self.right, "'%s' is '%s'"%(other.label, self.right.label)
+        # compatibility is transitive. left vs right already checked in `__init__`.
         self.left.check_compatible(other)
 
     @property
@@ -441,3 +448,12 @@ class ChannelDifference:
 
     def __sub__(self, other):
         return ChannelDifference(self, other)
+
+    @property
+    def output_physical_dimension(self):
+        return self.left.output_physical_dimension
+
+    @output_physical_dimension.setter
+    def output_physical_dimension(self, v):
+        self.left.output_physical_dimension = v
+        self.right.output_physical_dimension = v
