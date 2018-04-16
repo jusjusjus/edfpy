@@ -178,7 +178,7 @@ class Header:
         pass
 
     @classmethod
-    def read_file(cls, filename):
+    def read_file(cls, filename, keep_open=True):
         fo = cls.open_if_string(filename, 'rb')
         fo.seek(0, SEEK_SET)
 
@@ -191,7 +191,11 @@ class Header:
 
         instance = cls(**values)
         offset = instance._read_channels(fo)
-        instance.set_blob(fo)
+        if keep_open:
+            instance.set_blob(fo)
+        else:
+            fo.close()
+            instance.set_blob(filename)
         return instance
 
     def as_bytes(self, key, num_bytes=None):
