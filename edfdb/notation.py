@@ -190,7 +190,6 @@ def cached_property(fn):
 
 class Label(str):
 
-
     valid_types = [
         'EEG', 'ECG', 'EMG',
         'EOG', 'HR', 'RESP', 'POS',
@@ -217,7 +216,7 @@ class Label(str):
     @cached_property
     def type(self):
         return channel_type_by_label.get(
-                self.split('-')[0], self.prefix_type)
+                self.left, self.prefix_type)
 
     def is_type(self, other):
         return self.type == 'REF' or other == 'REF' or self.type == other
@@ -236,12 +235,12 @@ class Label(str):
     @cached_property
     def left(self):
         try:    return self.split('-')[0]
-        except: pass
+        except: return None
 
     @cached_property
     def right(self):
         try:    return self.split('-')[1]
-        except: pass
+        except: return None
 
     def reference(self):
         return self.right
@@ -251,8 +250,10 @@ class Label(str):
                 (self, self.type, right, right.type)
         if self.right == right.right:
             return type(self)(self.left+'-'+right.left)
+        elif self.left == right.left:
+            return type(self)(right.right+'-'+self.right)
         else:
-            return type(self)(self+'-'+right)
+            raise AssertionError("no matching channel in derivations [%s, %s]"%(self, right))
         
     def __str__(self):
         return self

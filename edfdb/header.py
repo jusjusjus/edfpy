@@ -5,6 +5,7 @@ from os import SEEK_SET
 from struct import Struct
 from .notation import Label
 from datetime import datetime
+from collections import defaultdict
 
 
 default_dtype = np.float32
@@ -36,6 +37,23 @@ class Header:
         self.datetime_changed = True
         for k, v in kwargs.items():
             setattr(self, k, v)
+
+    def _build_channel_differences(self):
+        C = list(self.channel_by_label.values())
+        for l, left in enumerate(C):
+            for right in C[l+1:]:
+                try:
+                    lr = left-right
+                    self.channel_by_label[lr.label] = lr
+                    rl = right-left
+                    self.channel_by_label[rl.label] = rl
+                except (AssertionError, TypeError) as e:
+                    self.logger.info("In Header.build_channel_differences: %s"%e)
+
+
+    def build_channel_differences(self, depth=1):
+        for _ in range(depth):
+            self._build_channel_differences()
 
     @property
     def startdate(self):
@@ -281,7 +299,6 @@ class ChannelHeader:
         self._num_samples = None
         self._offset = None
         self._scale = None
-        pass
 
     @property
     def label(self):
@@ -312,6 +329,11 @@ class ChannelHeader:
     @channel_type.setter
     def channel_type(self, v):
         self._channel_type = v
+
+    @property
+    def type(self):
+        """channel type from label"""
+        return self.label.type
 
     @property
     def physical_dimension(self):
@@ -380,3 +402,42 @@ class ChannelHeader:
     def _repr_html_(self):
         return ''.join(['<p>%s</p>'%s for s in self.to_string_list()])
 
+    def check_compatible(self, other):
+        # assert self is not other, "'%s' is '%s'"%(self.label, other.label)
+        for prop in ('sampling_rate', 'physical_dimension'):
+            assert getattr(self, prop) == getattr(other, prop), \
+                    "'%s' and '%s' differ in '%s'"%(self.label, other.label, prop)
+
+    def __sub__(self, other):
+        return ChannelDifference(self, other)
+
+
+class ChannelDifference:
+
+    def __init__(self, left, right):
+        left.check_compatible(right)
+        self.left = left
+        self.right = right
+        self.label = left.label-right.label
+
+    def check_compatible(self, other):
+        # assert other is not self.right, "'%s' is '%s'"%(other.label, self.right.label)
+        self.left.check_compatible(other)
+
+    @property
+    def type(self):
+        return self.label.type
+
+    @property
+    def sampling_rate(self):
+        return self.left.sampling_rate
+
+    @property
+    def physical_dimension(self):
+        return self.left.physical_dimension
+
+    def digital2physical(self, *args, **kwargs):
+        return self.left.digital2physical(*args, **kwargs)-self.right.digital2physical(*args, **kwargs)
+
+    def __sub__(self, other):
+        return ChannelDifference(self, other)
