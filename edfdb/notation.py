@@ -219,11 +219,8 @@ class Label(str):
         return channel_type_by_label.get(
                 self.split('-')[0], self.prefix_type)
 
-    def is_type(self, typ):
-        if self.type == 'REF':
-            return True
-        else:
-            return self.type == typ
+    def is_type(self, other):
+        return self.type == 'REF' or other == 'REF' or self.type == other
 
     @cached_property
     def prefix_type(self):
