@@ -147,9 +147,9 @@ class Header:
             _format_str = (str(size) + "s") * nc
             data = fo.read(num_bytes)
             values = Struct(_format_str).unpack(data)
-            for i, val in enumerate(values):
-                val = self.normalize(typ, val)
-                setattr(channels[i], field, val)
+            normalized = (self.normalize(typ, v) for v in values)
+            for c, v in zip(channels, normalized):
+                setattr(c, field, v)
             offset += num_bytes
         assert offset == self.num_header_bytes, 'invalid header of size %i [%i]'%(offset, self.num_header_bytes)
 
