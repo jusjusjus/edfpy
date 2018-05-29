@@ -12,7 +12,7 @@ class EDF(Header):
 
     @property
     def duration(self):
-        """Total duration of the recording in seconds."""
+        """Returns total duration of the recording in seconds."""
         return self.record_duration * self.num_records
 
     def get_digital_samples(self, t0=0.0, dt=None):
