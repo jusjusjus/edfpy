@@ -17,7 +17,7 @@ class EDF(Header):
 
     def get_digital_samples(self, t0=0.0, dt=None):
         """Return digital samples from `t0` to `t0+dt`."""
-        sr = self.sampling_rate_by_channel
+        sr = self.sampling_rates
         n = self.samples_per_record_by_channel
         if dt is None:
             dt = self.num_records*self.record_duration

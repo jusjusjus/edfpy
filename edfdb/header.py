@@ -168,10 +168,14 @@ class Header:
             channel.num_samples_per_record
             for channel in self.channels
         ])
-        self.sampling_rate_by_channel = np.array([
+        self.sampling_rates = np.array([
             channel.sampling_rate
             for channel in self.channels
         ])
+        self.sampling_rate_by_label = {
+            channel.label: channel.sampling_rate
+            for channel in self.channels
+        }
         self.channel_by_label = {c.label : c for c in channels}
 
     def set_blob(self, fo):
