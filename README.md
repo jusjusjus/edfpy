@@ -43,3 +43,7 @@ pytest tests
 
 The module was initially created by John C. Snyder and is now maintained by
 Justus Schwabedal.
+
+# License
+
+The software is released under the MIT license.
