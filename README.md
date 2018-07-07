@@ -22,8 +22,8 @@ python setup.py install
 Contributions are welcome.  Please create your own fork of `edfdb` and a pull
 request to the master branch starting with a title '[WIP] ...' that describes
 what you are working on.  We'll review the changes once you switch the title
-form '[WIP]' to '[MRG]'.  We'll add CI in the future.  Make sure to run the
-tests before submitting and switching the title.
+form '[WIP]' to '[MRG]'.  Make sure to run the tests before submitting and
+switching the title.  We also use [SemaphoreCI](https://semaphoreci.com/).
 
 To run the tests, first install the requirements-dev.txt file using 
 
