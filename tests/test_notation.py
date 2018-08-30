@@ -1,4 +1,9 @@
 
+# B/c the module is not compiled we can import the current version
+from sys import path
+from os.path import join, exists, dirname
+path.insert(0, join(dirname(__file__),'..'))
+
 import pytest
 from edfdb.notation import Label
 

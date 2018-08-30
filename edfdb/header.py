@@ -36,7 +36,11 @@ class Header:
     def __init__(self, *args, **kwargs):
         self.datetime_changed = True
         for k, v in kwargs.items():
-            setattr(self, k, v)
+            try:
+                # Accessing `prop.setter` through class property
+                getattr(type(self), k).fset(self, v)
+            except AttributeError:
+                setattr(self, k, v)
 
     def _build_channel_differences(self):
         C = list(self.channel_by_label.values())
@@ -110,7 +114,7 @@ class Header:
     @staticmethod
     def normalize(typ, v):
         if isinstance(v, str):
-            v = v.strip('\x00')
+            v = v.strip('\x00').strip(' ')
         elif isinstance(v, bytes):
             v = v.strip(b'\x00')
         else:
