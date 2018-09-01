@@ -361,7 +361,7 @@ class ChannelHeader:
 
     @channel_type.setter
     def channel_type(self, v):
-        self._channel_type = v
+        self._channel_type = v.strip()
 
     @property
     def type(self):
@@ -395,7 +395,7 @@ class ChannelHeader:
 
     @prefiltering.setter
     def prefiltering(self, v):
-        self._prefiltering = v
+        self._prefiltering = v.strip()
 
     @property
     def reserved(self):
@@ -403,7 +403,7 @@ class ChannelHeader:
 
     @reserved.setter
     def reserved(self, v):
-        self._reserved = v
+        self._reserved = v.strip()
 
     @property
     def scale(self):
@@ -526,7 +526,7 @@ class AnnotChannelHeader(ChannelHeader):
     @classmethod
     def from_channelheader(cls, header):
         ans = cls(header.specifier)
-        for field in ('label', 'num_samples_per_record'):
+        for field in ('label', 'num_samples_per_record', 'reserved'):
             val = getattr(header, field)
             try:
                 getattr(type(ans), field).fset(val)
