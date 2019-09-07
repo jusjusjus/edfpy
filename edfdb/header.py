@@ -43,9 +43,9 @@ class Header:
                 setattr(self, k, v)
 
     def _build_channel_differences(self):
-        C = list(self.channel_by_label.values())
-        for l, left in enumerate(C):
-            for right in C[l+1:]:
+        channels = list(self.channel_by_label.values())
+        for l, left in enumerate(channels):
+            for right in channels[l+1:]:
                 try:
                     lr = left-right
                     self.channel_by_label[lr.label] = lr
@@ -54,6 +54,11 @@ class Header:
                 except (AssertionError, TypeError) as e:
                     self.logger.info("In Header.build_channel_differences: %s"%e)
 
+    def add_synonym(self, synonym, label):
+        """add `synonym` for `label` to address a channel"""
+        self.channel_by_label[synonym] = self.channel_by_label[label]
+        self.sampling_rate_by_label[synonym] = \
+            self.sampling_rate_by_label[label]
 
     def build_channel_differences(self, depth=1):
         for _ in range(depth):
