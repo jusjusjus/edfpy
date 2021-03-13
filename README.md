@@ -30,7 +30,6 @@ To run the tests, first install the requirements-dev.txt file using
 ```
 pip install -r requirements.txt
 pip install -r requirements-dev.txt
-pre-commit install
 ```
 
 This installs `pytest`.  Before testing the package first install.

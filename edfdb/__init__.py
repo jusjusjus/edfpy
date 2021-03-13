@@ -1,9 +1,10 @@
-
+from typing import List
 import logging
 import numpy as np
 from os import SEEK_SET
 from contextlib import contextmanager
-from .header import Header, ChannelHeader
+from .header import Header
+from .header import ChannelHeader  # noqa: F401
 
 
 class EDF(Header):
@@ -29,20 +30,21 @@ class EDF(Header):
         B = np.ceil(b/n).astype(int).max()
         # relative start/stop of data read
         a1 = a - A*n
-        b1 = b - B*n # result is <= 0
+        b1 = b - B*n  # result is <= 0
         b1 = [None if b1_ == 0 else b1_ for b1_ in b1]
         # Read data and return result
         data = self.blob[A:B]
         return [d[l:r] for d, l, r in zip(data, a1, b1)]
 
-    def get_physical_samples(self, t0=0.0, dt=None, channels=None):
+    def get_physical_samples(self, t0: float = 0.0, dt: float = None,
+                             channels: List[str] = None):
         """Return physical samples from `t0` to `t0+dt`
 
         Arguments:
-            t0 (float) : start time
-            dt (float) : time difference to read out
-            channels (list of strings, optional) : contains the list of
-            channel labels that shall be returned (`None` returns all channels).
+        - t0 : start time
+        - dt : time difference to read out
+        - channels : contains the list of channel labels that shall be
+          returned.  `None` returns all channels.
 
         Returns:`
             a dict by channel label of the numpy.arrays with the data.
@@ -71,26 +73,27 @@ class EDF(Header):
 
     def write_file(self, filename, channels=None):
         fo = super().write_file(filename, close=False, channels=channels)
-        idx = [i for i, c in enumerate(self.channels) if c.label in channels] if channels else None
+        idx = [i for i, c in enumerate(
+            self.channels) if c.label in channels] if channels else None
         blob = self.blob.read(channel_indices=idx)
         fo.write(blob)
         if isinstance(filename, str):
             fo.close()
 
 
-
 class Blob:
 
     _bytes_per_sample = 2
-    
-    def __init__(self, file, records, samples_per_record, channel_locs, offset):
+
+    def __init__(self, file, records, samples_per_record, channel_locs,
+                 offset):
         self._file = file
         self.keep_open = not isinstance(self._file, str)
         self.samples_per_record = samples_per_record
         self.records = records
         self.channel_locs = list(zip(channel_locs[:-1], channel_locs[1:]))
         self.offset = offset
-        self.dtype = '<i%i'%self._bytes_per_sample
+        self.dtype = '<i%i' % self._bytes_per_sample
 
     @contextmanager
     def file(self):
@@ -105,7 +108,8 @@ class Blob:
             fo = self._file if self.keep_open else open(self._file, 'rb')
             yield fo
         finally:
-            if not self.keep_open: fo.close()
+            if not self.keep_open:
+                fo.close()
 
     def __getitem__(self, sl):
         """Return data contained in the records of `sl`.
@@ -119,7 +123,7 @@ class Blob:
         N = self.records
         b = self._bytes_per_sample
         start = 0 if sl.start is None else sl.start
-        stop  = N if sl.stop  is None else sl.stop
+        stop = N if sl.stop is None else sl.stop
         ds = stop-start
         offset = int(b*start*n + self.offset)
         readsize = int(b*ds*n)
@@ -131,7 +135,8 @@ class Blob:
         return [data[:, u:v].flatten() for u, v in self.channel_locs]
 
     def read(self, channel_indices=None):
-        idx = channel_indices if channel_indices else np.arange(len(self.channel_locs))
+        idx = channel_indices if channel_indices else np.arange(
+            len(self.channel_locs))
         shp = (self.records, self.samples_per_record)
         with self.file() as fo:
             fo.seek(self.offset, SEEK_SET)
