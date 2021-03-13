@@ -2,7 +2,7 @@ from os.path import join, exists, dirname
 
 import pytest
 
-from edfdb.header import Header
+from edfpy.header import Header
 
 
 @pytest.fixture
