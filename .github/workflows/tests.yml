@@ -54,7 +54,7 @@ jobs:
           python-version: '3.8'
 
       - name: 'Install dependencies'
-        run: pip install -r requirements.txt -r requirements-dev.txt
+        run: make install.dev
 
       - name: 'Run unit tests'
         run: make check.units

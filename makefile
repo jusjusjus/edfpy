@@ -9,7 +9,7 @@ check.linting:
 check.units:
 	python -m pytest
 
-install:
+install.dev:
 	pip install \
 		-r requirements.txt \
 		-r requirements-dev.txt
