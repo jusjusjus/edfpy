@@ -1,3 +1,8 @@
+check.types:
+	mypy --ignore-missing-imports edfdb
 
-test:
-	pytest
+check.linting:
+	flake8
+
+check.units:
+	python -m pytest
