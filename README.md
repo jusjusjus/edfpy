@@ -35,8 +35,8 @@ pip install -r requirements-dev.txt
 This installs `pytest`.  Before testing the package first install.
 
 ```
-python setup.py install
-pytest tests
+pip install -e .
+make check
 ```
 
 # Contributors
