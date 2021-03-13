@@ -1,7 +1,7 @@
-
 import pytest
 
-from ..notation import Label
+from edfdb.notation import Label
+
 
 @pytest.mark.parametrize("original,normalized,typ", [
     ('M1-REF',      'M1-REF',   'EEG'),

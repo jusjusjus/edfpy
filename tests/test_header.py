@@ -1,16 +1,15 @@
-
 from os.path import join, exists, dirname
 
 import pytest
 
-from ..header import Header
+from edfdb.header import Header
 
 
 @pytest.fixture
 def header():
-    filename = join(dirname(__file__), '..', '..', 'examples', 'sample.edf')
-    assert exists(filename), 'File %s not existent'%filename
-    return Header.read_file(filename)
+    filepath = join(dirname(__file__), '..', 'examples', 'sample.edf')
+    assert exists(filepath), f"File {filepath} not existent"
+    return Header.read_file(filepath)
 
 @pytest.mark.parametrize("field,expected", [
     ('version',         '0'),
