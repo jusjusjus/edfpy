@@ -1,3 +1,5 @@
+check: check.linting check.types check.units
+
 check.types:
 	mypy --ignore-missing-imports edfdb
 
@@ -6,3 +8,8 @@ check.linting:
 
 check.units:
 	python -m pytest
+
+install:
+	pip install \
+		-r requirements.txt \
+		-r requirements-dev.txt

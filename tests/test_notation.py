@@ -9,18 +9,19 @@ from edfdb.notation import Label
     ('EEG O1-M2',   'O1-M2',    'EEG'),
     ('EEG C3/A2',   'C3-M2',    'EEG'),
     ('EEG1.2',      'EEG1.2',   'EEG'),
-    ('EOG ROC-REF', 'EOG_R-REF','EOG'),
+    ('EOG ROC-REF', 'EOG_R-REF', 'EOG'),
     ('EMG1.2',      'EMG1.2',   'EMG'),
     ('EMG-REF',     'EMG-REF',  'EMG'),
     ('EEG EKG-REF', 'ECG-REF',  'ECG'),
-    ('EEG EKG2-REF','ECG2-REF', 'ECG'),
+    ('EEG EKG2-REF', 'ECG2-REF', 'ECG'),
 ])
 def test_normalization(original, normalized, typ):
-    """Tests that `edfdb.Label` transforms `original` to `normalized` and infers `typ` as type."""
+    """Tests that `edfdb.Label` transforms `original` to `normalized` and
+    infers `typ` as type."""
     label = Label(original)
     assert label.is_type(label.type)
     assert label.is_type(typ) and normalized == label, \
-            "{} (origin), got {} of type {}".format(original, label, label.type)
+        "{} (origin), got {} of type {}".format(original, label, label.type)
 
 
 @pytest.mark.parametrize("left,right,difference", [
@@ -34,4 +35,4 @@ def test_label_difference(left, right, difference):
     l1, l2 = Label(left), Label(right)
     diff = l1-l2
     assert diff.is_type(l1.type)
-    assert diff == difference 
+    assert diff == difference

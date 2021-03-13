@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def plot_physical_samples(fo, t0, dt):
     ax = None
     X = fo.get_physical_samples(t0, dt)

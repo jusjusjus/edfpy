@@ -11,6 +11,7 @@ def header():
     assert exists(filepath), f"File {filepath} not existent"
     return Header.read_file(filepath)
 
+
 @pytest.mark.parametrize("field,expected", [
     ('version',         '0'),
     ('patient_id',      'brux2'),
@@ -25,4 +26,5 @@ def header():
 ])
 def test_header(field, expected, header):
     """Checks header's `field` to be `expected`."""
-    assert header.__getattribute__(field) == expected, "expected `%s` `%s` [%s]"%(field, val, expected)
+    value = header.__getattribute__(field)
+    assert value == expected, f"expected `{field}` `{value}` [{expected}]"
