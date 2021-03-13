@@ -1,6 +1,6 @@
 import pytest
 
-from edfdb.notation import Label
+from edfpy.notation import Label
 
 
 @pytest.mark.parametrize("original,normalized,typ", [
@@ -16,7 +16,7 @@ from edfdb.notation import Label
     ('EEG EKG2-REF', 'ECG2-REF', 'ECG'),
 ])
 def test_normalization(original, normalized, typ):
-    """Tests that `edfdb.Label` transforms `original` to `normalized` and
+    """Tests that `edfpy.Label` transforms `original` to `normalized` and
     infers `typ` as type."""
     label = Label(original)
     assert label.is_type(label.type)

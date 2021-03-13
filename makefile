@@ -1,7 +1,7 @@
 check: check.linting check.types check.units
 
 check.types:
-	mypy --ignore-missing-imports edfdb
+	mypy --ignore-missing-imports edfpy
 
 check.linting:
 	flake8

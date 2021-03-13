@@ -2,7 +2,7 @@
 
 # Introduction
 
-`edfdb` is a minimal python library to read and write the [European Data
+`edfpy` is a minimal python library to read and write the [European Data
 Format](https://www.edfplus.info/) (EDF).  The main aim of `edflib` is the fast
 and accurate handling of EEG signals stored in EDF.  The library is designed to
 be able to read from [MongoDB Grid
@@ -19,7 +19,7 @@ python setup.py install
 
 # Development and Contribution
 
-Contributions are welcome.  Please create your own fork of `edfdb` and a pull
+Contributions are welcome.  Please create your own fork of `edfpy` and a pull
 request to the master branch starting with a title '[WIP] ...' that describes
 what you are working on.  We'll review the changes once you switch the title
 form '[WIP]' to '[MRG]'.  Make sure to run the tests before submitting and
