@@ -1,9 +1,9 @@
-check: check.linting check.types check.units
+check: check.style check.types check.units
 
 check.types:
 	mypy --ignore-missing-imports edfpy
 
-check.linting:
+check.style:
 	flake8
 
 check.units:
