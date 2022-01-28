@@ -5,6 +5,7 @@ import numpy as np
 
 from .notation import Label, convert_units
 from .channel_difference import ChannelDifference
+from .field import Field
 
 default_dtype = np.float32
 
@@ -14,19 +15,19 @@ class ChannelHeader:
     logger = logging.getLogger(name='ChannelHeader')
 
     _fields = [
-        ('label', str, 16),
-        ('channel_type', str, 80),
-        ('physical_dimension', str, 8),
-        ('physical_minimum', float, 8),
-        ('physical_maximum', float, 8),
-        ('digital_minimum', int, 8),
-        ('digital_maximum', int, 8),
-        ('prefiltering', str, 80),
-        ('num_samples_per_record', int, 8),
-        ('reserved', str, 32)
+        Field('label', str, 16),
+        Field('channel_type', str, 80),
+        Field('physical_dimension', str, 8),
+        Field('physical_minimum', float, 8),
+        Field('physical_maximum', float, 8),
+        Field('digital_minimum', int, 8),
+        Field('digital_maximum', int, 8),
+        Field('prefiltering', str, 80),
+        Field('num_samples_per_record', int, 8),
+        Field('reserved', str, 32)
     ]
 
-    # _num_channel_header_bytes = sum(c for _,_,c in _fields)
+    # _num_channel_header_bytes = sum(f.size for f in _fields)
     _num_header_bytes = 256
 
     def __init__(self, specifier):

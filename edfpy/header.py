@@ -5,6 +5,7 @@ from datetime import datetime
 
 import numpy as np
 
+from .field import Field
 from .channel_header import ChannelHeader
 from .channel_difference import ChannelDifference
 
@@ -14,16 +15,16 @@ class Header:
     logger = getLogger(name='Header')
 
     _fields = [
-        ('version', str, 8),
-        ('patient_id', str, 80),
-        ('recording_id', str, 80),
-        ('startdate', str, 8),
-        ('starttime', str, 8),
-        ('num_header_bytes', int, 8),
-        ('reserved', str, 44),
-        ('num_records', int, 8),
-        ('record_duration', float, 8),
-        ('num_channels', int, 4)
+        Field('version', str, 8),
+        Field('patient_id', str, 80),
+        Field('recording_id', str, 80),
+        Field('startdate', str, 8),
+        Field('starttime', str, 8),
+        Field('num_header_bytes', int, 8),
+        Field('reserved', str, 44),
+        Field('num_records', int, 8),
+        Field('record_duration', float, 8),
+        Field('num_channels', int, 4)
     ]
 
     # format_str = ''.join(str(size) + 's'
@@ -181,14 +182,14 @@ class Header:
         offset = 256
         nc = self.num_channels
         channels = [ChannelHeader(i) for i in range(nc)]
-        for field, typ, size in ChannelHeader._fields:
-            num_bytes = size * nc
-            _format_str = (str(size) + "s") * nc
+        for field in ChannelHeader._fields:
+            num_bytes = field.size * nc
+            _format_str = (str(field.size) + "s") * nc
             data = fo.read(num_bytes)
             values = Struct(_format_str).unpack(data)
-            normalized = (self.normalize(typ, v) for v in values)
+            normalized = (self.normalize(field.type, v) for v in values)
             for c, v in zip(channels, normalized):
-                setattr(c, field, v)
+                setattr(c, field.name, v)
             offset += num_bytes
 
         assert offset == self.num_header_bytes, f" \
@@ -228,12 +229,12 @@ class Header:
         fo.seek(0, SEEK_SET)
 
         data = fo.read(256)
-        unpacked = Struct(cls._format_str).unpack(data)
-        assigned = {
-            name: cls.normalize(typ, value)
-            for value, (name, typ, num_bytes) in zip(unpacked, cls._fields)
+        values = Struct(cls._format_str).unpack(data)
+        named_content = {
+            field.name: cls.normalize(field.type, value)
+            for field, value in zip(cls._fields, values)
         }
-        instance = cls(**assigned)
+        instance = cls(**named_content)
         instance._read_channels(fo)
         if keep_open:
             instance.set_blob(fo)
@@ -269,15 +270,15 @@ class Header:
         self.num_channels = len(channels)
         # Main header
         ret = [
-            self.as_bytes(key, num_bytes)
-            for key, _, num_bytes in self._fields
+            self.as_bytes(field.name, field.size)
+            for field in self._fields
         ]
         # Channel headers
         channel_format_str = ''
-        for key, _, size in ChannelHeader._fields:
-            channel_format_str += (str(size)+'s')*self.num_channels
+        for field in ChannelHeader._fields:
+            channel_format_str += (str(field.size)+'s') * self.num_channels
             ret += [
-                channel.as_bytes(key, num_bytes=size)
+                channel.as_bytes(field.name, num_bytes=field.size)
                 for channel in channels
             ]
 
