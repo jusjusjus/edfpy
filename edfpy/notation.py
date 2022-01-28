@@ -183,7 +183,9 @@ def cached_property(fn):
     def _cached_property(self):
         if not hasattr(self, attr_name):
             setattr(self, attr_name, fn(self))
+
         return getattr(self, attr_name)
+
     return _cached_property
 
 
@@ -259,6 +261,7 @@ class Label(str):
         else:
             raise AssertionError(
                 "no matching channel in derivations [%s, %s]" % (self, right))
+
         return type(self)('%s-%s' % lr)
 
     def __str__(self):

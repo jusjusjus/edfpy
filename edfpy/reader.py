@@ -14,21 +14,20 @@ class EDF(Header):
         """Returns total duration of the recording in seconds."""
         return self.record_duration * self.num_records
 
-    def get_digital_samples(self, t0=0.0, dt=None):
+    def get_digital_samples(self, t0: float = 0.0, dt: float = None):
         """Return digital samples from `t0` to `t0+dt`."""
         sr = self.sampling_rates
         n = self.samples_per_record_by_channel
-        if dt is None:
-            dt = self.num_records*self.record_duration
+        dt = dt or self.num_records * self.record_duration
         # start/stop samples per channel
-        a = np.round(t0*sr).astype(int)
-        b = np.round((t0+dt)*sr).astype(int)
+        a = np.round(t0 * sr).astype(int)
+        b = np.round((t0 + dt) * sr).astype(int)
         # start/stop record enclosing (min(a), max(b))
-        A = np.floor(a/n).astype(int).min()
-        B = np.ceil(b/n).astype(int).max()
+        A = np.floor(a / n).astype(int).min()
+        B = np.ceil(b / n).astype(int).max()
         # relative start/stop of data read
-        a1 = a - A*n
-        b1 = b - B*n  # result is <= 0
+        a1 = a - A * n
+        b1 = b - B * n  # result is <= 0
         b1 = [None if b1_ == 0 else b1_ for b1_ in b1]
         # Read data and return result
         data = self.blob[A:B]
@@ -71,8 +70,8 @@ class EDF(Header):
 
     def write_file(self, filename, channels=None):
         fo = super().write_file(filename, close=False, channels=channels)
-        idx = [i for i, c in enumerate(
-            self.channels) if c.label in channels] if channels else None
+        idx = [i for i, c in enumerate(self.channels)
+               if c.label in channels] if channels else None
         blob = self.blob.read(channel_indices=idx)
         fo.write(blob)
         if isinstance(filename, str):
