@@ -69,6 +69,24 @@ class Header:
             self._build_channel_differences()
 
     @property
+    def num_records(self) -> int:
+        """returns number of records"""
+        return self._num_records
+
+    @num_records.setter
+    def num_records(self, v):
+        self._num_records = v
+
+    @property
+    def record_duration(self) -> int:
+        """returns seconds per record"""
+        return self._record_duration
+
+    @record_duration.setter
+    def record_duration(self, v):
+        self._record_duration = v
+
+    @property
     def startdate(self):
         """Local start date of the recording"""
         return self._startdate
@@ -128,14 +146,17 @@ class Header:
             v = v.strip(b'\x00')
         else:
             AttributeError("Unknown type")
+
         if typ is str:
             if isinstance(v, bytes):
                 try:
                     v = str(v, 'ascii')
                 except BaseException:
                     v = str(v, 'latin1')
+
         else:
             v = typ(v)
+
         return v
 
     @property
@@ -150,7 +171,9 @@ class Header:
                 self._startdatetime = datetime.strptime(
                     self.startdate + "-" + self.starttime, "%m.%d.%y-%H.%M.%S"
                 )
+
             self.datetime_changed = False
+
         return self._startdatetime
 
     def _read_channels(self, fo):
@@ -166,6 +189,7 @@ class Header:
             for c, v in zip(channels, normalized):
                 setattr(c, field, v)
             offset += num_bytes
+
         assert offset == self.num_header_bytes, f" \
             invalid header of size {offset} [{self.num_header_bytes}]"
 
@@ -208,7 +232,6 @@ class Header:
             name: cls.normalize(typ, value)
             for value, (name, typ, num_bytes) in zip(values, cls._fields)
         }
-
         instance = cls(**values)
         instance._read_channels(fo)
         if keep_open:
@@ -216,6 +239,7 @@ class Header:
         else:
             fo.close()
             instance.set_blob(filename)
+
         return instance
 
     def as_bytes(self, key, num_bytes=None):
@@ -238,6 +262,7 @@ class Header:
                               key=lambda c: c.specifier)
         else:
             channels = self.channels
+
         # Temporarily change `self.num_channels`
         tmp_num_ch = self.num_channels
         self.num_channels = len(channels)
@@ -254,6 +279,7 @@ class Header:
                 channel.as_bytes(key, num_bytes=size)
                 for channel in channels
             ]
+
         # Change `self.num_channels` back to original
         self.num_channels = tmp_num_ch
         return ret, self._format_str + channel_format_str
@@ -266,6 +292,7 @@ class Header:
         fo.write(packed)
         if isinstance(filename, str) and close:
             fo.close()
+
         return fo
 
     @staticmethod
@@ -274,9 +301,11 @@ class Header:
             fo = open(f, mode)
         else:
             fo = f
+
         for m in ('read', 'seek'):
             assert hasattr(fo, m), "Missing property in \
                     file ['{}', '{}', '{}']".format(m, f, fo)
+
         return fo
 
     def to_string_list(self):

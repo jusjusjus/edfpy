@@ -50,6 +50,7 @@ class ChannelHeader:
     def label(self, v):
         if not isinstance(v, Label):
             v = Label(v.strip())
+
         self._label = v
 
     @property
@@ -57,12 +58,14 @@ class ChannelHeader:
         if self._sampling_rate is None:
             self._sampling_rate = self.num_samples_per_record / \
                                   self.record_duration  # ignore: type
+
         return self._sampling_rate
 
     @property
     def num_samples(self):
         if self._num_samples is None:
             self._num_samples = self.num_samples_per_record * self.num_records
+
         return self._num_samples
 
     @property
@@ -119,6 +122,7 @@ class ChannelHeader:
         if self._scale is None:
             self._scale = (self.physical_maximum - self.physical_minimum) / \
                 (self.digital_maximum - self.digital_minimum)
+
         return self._scale
 
     @property
@@ -126,6 +130,7 @@ class ChannelHeader:
         if self._offset is None:
             self._offset = self.physical_maximum / self.scale \
                            - self.digital_maximum  # pyright: disable
+
         return self._offset
 
     def digital2physical(self, data, dtype=default_dtype, specifier=None):

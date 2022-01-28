@@ -54,6 +54,7 @@ class Blob:
             fo.seek(offset, SEEK_SET)
             data = np.frombuffer(fo.read(readsize),
                                  dtype=self.dtype).reshape(shp)
+
         return [data[:, u:v].flatten() for u, v in self.channel_locs]
 
     def read(self, channel_indices=None):
@@ -63,6 +64,7 @@ class Blob:
         with self.file() as fo:
             fo.seek(self.offset, SEEK_SET)
             data = np.frombuffer(fo.read(), dtype=self.dtype).reshape(shp)
+
         blob = np.concatenate([
             data[:, u:v] for i, (u, v) in enumerate(self.channel_locs)
             if i in idx
