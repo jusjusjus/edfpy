@@ -6,7 +6,7 @@ from edfpy.header import Header
 
 
 @pytest.fixture
-def header():
-    filepath = join(dirname(__file__), '..', '..', 'examples', 'sample.edf')
+def header(filename):
+    filepath = join(dirname(__file__), '..', '..', 'examples', filename)
     assert exists(filepath), f"File {filepath} not existent"
     return Header.read_file(filepath)
