@@ -173,7 +173,7 @@ synonyms.update(**{
 
 channel_type_by_label = {}
 for channel_type, channels in channel_labels_by_type.items():
-    channel_type_by_label.update({ch.upper(): channel_type for ch in channels})
+    channel_type_by_label.update({ch: channel_type for ch in channels})
 
 
 def cached_property(fn):
@@ -197,12 +197,13 @@ class Label(str):
     channel_type_pattern = re.compile(r'(%s)' % '|'.join(valid_types))
 
     def __new__(cls, label):
-        return super().__new__(cls, cls.normalize(label))
+        normalized = cls.normalize(label)
+        return super().__new__(cls, normalized)
 
     @classmethod
     def normalize(cls, original):
         split = original.replace('/', '-').upper().split(' ')
-        label = split[1] if len(split) > 1 else split[0]
+        label = split[1] if 1 < len(split) else split[0]
         synonym_tuple = (
             synonyms.get(part, part)
             for part in label.split('-')
