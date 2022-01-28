@@ -1,14 +1,16 @@
-import numpy as np
 from os import SEEK_SET
+from typing import List, Iterable
 from contextlib import contextmanager
+
+import numpy as np
 
 
 class Blob:
 
     _bytes_per_sample = 2
 
-    def __init__(self, file, records, samples_per_record, channel_locs,
-                 offset):
+    def __init__(self, file, records: int, samples_per_record: int,
+                 channel_locs: List[int], offset: int):
         self._file = file
         self.keep_open = not isinstance(self._file, str)
         self.samples_per_record = samples_per_record
@@ -33,7 +35,7 @@ class Blob:
             if not self.keep_open:
                 fo.close()
 
-    def __getitem__(self, sl):
+    def __getitem__(self, sl: slice) -> List[np.ndarray]:
         """Return data contained in the records of `sl`.
 
         Returned data is a by-channel list of all datapoints
@@ -57,7 +59,7 @@ class Blob:
 
         return [data[:, u:v].flatten() for u, v in self.channel_locs]
 
-    def read(self, channel_indices=None):
+    def read(self, channel_indices: Iterable[int] = None) -> bytes:
         idx = channel_indices if channel_indices else np.arange(
             len(self.channel_locs))
         shp = (self.records, self.samples_per_record)

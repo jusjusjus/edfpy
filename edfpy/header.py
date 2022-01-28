@@ -6,6 +6,7 @@ from datetime import datetime
 import numpy as np
 
 from .channel_header import ChannelHeader
+from .channel_difference import ChannelDifference
 
 
 class Header:
@@ -52,19 +53,19 @@ class Header:
                     self.logger.info(
                         "In Header.build_channel_differences: %s" % e)
 
-    def append_channel(self, channel):
+    def append_channel(self, channel: ChannelDifference):
         """append channel to channel dictionaries"""
         self.channel_by_label[channel.label] = channel
         self.sampling_rate_by_label[channel.label] = channel.sampling_rate
 
-    def add_synonym(self, synonym, label):
+    def add_synonym(self, synonym: str, label: str):
         """add a `synonym` for a channel `label`"""
         channel = self.channel_by_label[label]
         sampling_rate = self.sampling_rate_by_label[label]
         self.channel_by_label[synonym] = channel
         self.sampling_rate_by_label[synonym] = sampling_rate
 
-    def build_channel_differences(self, depth=1):
+    def build_channel_differences(self, depth: int = 1):
         for _ in range(depth):
             self._build_channel_differences()
 
@@ -74,7 +75,7 @@ class Header:
         return self._num_records
 
     @num_records.setter
-    def num_records(self, v):
+    def num_records(self, v: int):
         self._num_records = v
 
     @property
@@ -83,59 +84,59 @@ class Header:
         return self._record_duration
 
     @record_duration.setter
-    def record_duration(self, v):
+    def record_duration(self, v: int):
         self._record_duration = v
 
     @property
-    def startdate(self):
+    def startdate(self) -> str:
         """Local start date of the recording"""
         return self._startdate
 
     @startdate.setter
-    def startdate(self, v):
+    def startdate(self, v: str):
         self.datetime_changed = True
         self._startdate = self.normalize(str, v)
 
     @property
-    def starttime(self):
+    def starttime(self) -> str:
         """Local start time of the recording"""
         return self._starttime
 
     @starttime.setter
-    def starttime(self, v):
+    def starttime(self, v: str):
         self.datetime_changed = True
         self._starttime = self.normalize(str, v)
 
     @property
-    def version(self):
+    def version(self) -> str:
         return self._version
 
     @version.setter
-    def version(self, v):
+    def version(self, v: str):
         self._version = self.normalize(str, v)
 
     @property
-    def patient_id(self):
+    def patient_id(self) -> str:
         return self._patient_id
 
     @patient_id.setter
-    def patient_id(self, v):
+    def patient_id(self, v: str):
         self._patient_id = self.normalize(str, v)
 
     @property
-    def recording_id(self):
+    def recording_id(self) -> str:
         return self._recording_id
 
     @recording_id.setter
-    def recording_id(self, v):
+    def recording_id(self, v: str):
         self._recording_id = self.normalize(str, v)
 
     @property
-    def reserved(self):
+    def reserved(self) -> str:
         return self._reserved
 
     @reserved.setter
-    def reserved(self, v):
+    def reserved(self, v: str):
         self._reserved = self.normalize(str, v)
 
     @staticmethod
@@ -160,7 +161,7 @@ class Header:
         return v
 
     @property
-    def startdatetime(self):
+    def startdatetime(self) -> datetime:
         if self.datetime_changed:
             try:
                 self._startdatetime = datetime.strptime(
@@ -222,17 +223,17 @@ class Header:
         pass
 
     @classmethod
-    def read_file(cls, filename, keep_open=True):
+    def read_file(cls, filename: str, keep_open: bool = True):
         fo = cls.open_if_string(filename, 'rb')
         fo.seek(0, SEEK_SET)
 
         data = fo.read(256)
-        values = Struct(cls._format_str).unpack(data)
-        values = {
+        unpacked = Struct(cls._format_str).unpack(data)
+        assigned = {
             name: cls.normalize(typ, value)
-            for value, (name, typ, num_bytes) in zip(values, cls._fields)
+            for value, (name, typ, num_bytes) in zip(unpacked, cls._fields)
         }
-        instance = cls(**values)
+        instance = cls(**assigned)
         instance._read_channels(fo)
         if keep_open:
             instance.set_blob(fo)
@@ -242,18 +243,18 @@ class Header:
 
         return instance
 
-    def as_bytes(self, key, num_bytes=None):
+    def as_bytes(self, key: str, num_bytes: int = None):
         """Converts `str` representation of `self.key` to `bytes` instance"""
         fstring = "{:<%i}" % num_bytes if num_bytes else "{}"
         return bytes(fstring.format(getattr(self, key)), 'latin1')
 
     @property
-    def num_header_bytes(self):
+    def num_header_bytes(self) -> int:
         return self._num_header_bytes + \
                self.num_channels * ChannelHeader._num_header_bytes
 
     @num_header_bytes.setter
-    def num_header_bytes(self, _):
+    def num_header_bytes(self, v: int):
         pass
 
     def to_bytes(self, channels=None):
@@ -284,7 +285,7 @@ class Header:
         self.num_channels = tmp_num_ch
         return ret, self._format_str + channel_format_str
 
-    def write_file(self, filename, close=True, channels=None):
+    def write_file(self, filename: str, close=True, channels=None):
         fo = self.open_if_string(filename, 'wb')
         blob, format_str = self.to_bytes(channels=channels)
         packed = Struct(format_str).pack(*blob)

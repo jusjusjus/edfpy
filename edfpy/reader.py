@@ -10,7 +10,7 @@ class EDF(Header):
     logger = logging.getLogger(name='EDF')
 
     @property
-    def duration(self):
+    def duration(self) -> int:
         """Returns total duration of the recording in seconds."""
         return self.record_duration * self.num_records
 
@@ -68,7 +68,7 @@ class EDF(Header):
             self.num_header_bytes
         )
 
-    def write_file(self, filename, channels=None):
+    def write_file(self, filename: str, channels=None):  # type: ignore
         fo = super().write_file(filename, close=False, channels=channels)
         idx = [i for i, c in enumerate(self.channels)
                if c.label in channels] if channels else None

@@ -1,4 +1,5 @@
 import re
+from typing import Dict, Optional
 
 
 channel_labels_by_type = dict(
@@ -171,7 +172,7 @@ synonyms.update(**{
 })
 
 
-channel_type_by_label = {}
+channel_type_by_label: Dict[str, str] = {}
 for channel_type, channels in channel_labels_by_type.items():
     channel_type_by_label.update({ch: channel_type for ch in channels})
 
@@ -198,12 +199,12 @@ class Label(str):
     ]
     channel_type_pattern = re.compile(r'(%s)' % '|'.join(valid_types))
 
-    def __new__(cls, label):
+    def __new__(cls, label: str):
         normalized = cls.normalize(label)
         return super().__new__(cls, normalized)
 
     @classmethod
-    def normalize(cls, original):
+    def normalize(cls, original: str) -> str:
         split = original.replace('/', '-').upper().split(' ')
         label = split[1] if 1 < len(split) else split[0]
         synonym_tuple = (
@@ -212,7 +213,7 @@ class Label(str):
         )
         return '-'.join(synonym_tuple)
 
-    def __init__(self, original):
+    def __init__(self, original: str):
         self.original = original
 
     @cached_property
@@ -220,11 +221,11 @@ class Label(str):
         return channel_type_by_label.get(
             self.left, self.prefix_type)
 
-    def is_type(self, other):
+    def is_type(self, other) -> bool:
         return self.type == 'REF' or other == 'REF' or self.type == other
 
     @cached_property
-    def prefix_type(self):
+    def prefix_type(self) -> Optional[str]:
         original = self.original.upper()
         prefix = original.split(' ')[0]
         if prefix in self.valid_types:
@@ -234,21 +235,23 @@ class Label(str):
             if m is not None:
                 return m.group(0)
 
+        return None
+
     @cached_property
-    def left(self):
+    def left(self) -> Optional[str]:
         try:
             return self.split('-')[0]
         except BaseException:
             return None
 
     @cached_property
-    def right(self):
+    def right(self) -> Optional[str]:
         try:
             return self.split('-')[1]
         except BaseException:
             return None
 
-    def reference(self):
+    def reference(self) -> Optional[str]:
         return self.right
 
     def __sub__(self, right):
@@ -264,7 +267,7 @@ class Label(str):
 
         return type(self)('%s-%s' % lr)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self
 
 

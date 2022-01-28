@@ -15,15 +15,15 @@ class ChannelDifference:
         self.left.check_compatible(other)
 
     @property
-    def type(self):
+    def type(self) -> str:
         return self.label.type
 
     @property
-    def sampling_rate(self):
+    def sampling_rate(self) -> int:
         return self.left.sampling_rate
 
     @property
-    def physical_dimension(self):
+    def physical_dimension(self) -> str:
         return self.left.physical_dimension
 
     def digital2physical(self, *args, **kwargs):
@@ -34,10 +34,10 @@ class ChannelDifference:
         return ChannelDifference(self, other)
 
     @property
-    def output_physical_dimension(self):
+    def output_physical_dimension(self) -> str:
         return self.left.output_physical_dimension
 
     @output_physical_dimension.setter
-    def output_physical_dimension(self, v):
+    def output_physical_dimension(self, v: str):
         self.left.output_physical_dimension = v
         self.right.output_physical_dimension = v
