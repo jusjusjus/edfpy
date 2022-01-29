@@ -4,35 +4,20 @@ import numpy as np
 
 from .notation import Label, convert_units
 from .channel_difference import ChannelDifference
-from .field import Field
+from .channel_fields import ChannelFields
 
 default_dtype = np.float32
 
 
-class ChannelHeader:
-    _fields = [
-        Field('label', str, 16),
-        Field('channel_type', str, 80),
-        Field('physical_dimension', str, 8),
-        Field('physical_minimum', float, 8),
-        Field('physical_maximum', float, 8),
-        Field('digital_minimum', int, 8),
-        Field('digital_maximum', int, 8),
-        Field('prefiltering', str, 80),
-        Field('num_samples_per_record', int, 8),
-        Field('reserved', str, 32)
-    ]
+class ChannelHeader(ChannelFields):
 
-    # _num_channel_header_bytes = sum(f.size for f in _fields)
-    _num_header_bytes = 256
-
-    def __init__(self, specifier):
+    def __init__(self, specifier, **kwargs):
         """
         Arguments:
             specifier: specifies the channel construction,
             typically the reference index in a data blob.
         """
-        self.specifier = specifier
+        super().__init__(specifier, **kwargs)
         self._sampling_rate = None
         self._num_samples = None
         self._offset = None
@@ -50,54 +35,6 @@ class ChannelHeader:
             v = Label(v.strip())
 
         self._label = v
-
-    @property
-    def num_records(self) -> int:
-        return self._num_records
-
-    @num_records.setter
-    def num_records(self, v: int):
-        self._num_records = v
-
-    @property
-    def num_records(self) -> int:
-        return self._num_records
-
-    @num_records.setter
-    def num_records(self, v: int):
-        self._num_records = v
-
-    @property
-    def physical_minimum(self) -> float:
-        return self._physical_minimum
-
-    @physical_minimum.setter
-    def physical_minimum(self, v: float):
-        self._physical_minimum = v
-
-    @property
-    def physical_maximum(self) -> float:
-        return self._physical_maximum
-
-    @physical_maximum.setter
-    def physical_maximum(self, v: float):
-        self._physical_maximum = v
-
-    @property
-    def digital_minimum(self) -> int:
-        return self._digital_minimum
-
-    @digital_minimum.setter
-    def digital_minimum(self, v: int):
-        self._digital_minimum = v
-
-    @property
-    def digital_maximum(self) -> int:
-        return self._digital_maximum
-
-    @digital_maximum.setter
-    def digital_maximum(self, v: int):
-        self._digital_maximum = v
 
     @property
     def record_duration(self) -> int:
@@ -131,25 +68,17 @@ class ChannelHeader:
         return self._num_samples
 
     @property
-    def channel_type(self) -> str:
-        return self._channel_type
+    def num_records(self) -> int:
+        return self._num_records
 
-    @channel_type.setter
-    def channel_type(self, v: str):
-        self._channel_type = v
+    @num_records.setter
+    def num_records(self, v: int):
+        self._num_records = v
 
     @property
     def type(self) -> str:
         """channel type from label"""
         return self.label.type
-
-    @property
-    def physical_dimension(self) -> str:
-        return self._physical_dimension
-
-    @physical_dimension.setter
-    def physical_dimension(self, v: str):
-        self._physical_dimension = v.strip()
 
     @property
     def output_physical_dimension(self) -> str:
@@ -162,22 +91,6 @@ class ChannelHeader:
         self._output_physical_dimension = v
         self.unit_scale = convert_units(
             self.physical_dimension, self._output_physical_dimension)
-
-    @property
-    def prefiltering(self) -> str:
-        return self._prefiltering
-
-    @prefiltering.setter
-    def prefiltering(self, v: str):
-        self._prefiltering = v
-
-    @property
-    def reserved(self) -> str:
-        return self._reserved
-
-    @reserved.setter
-    def reserved(self, v: str):
-        self._reserved = v
 
     @property
     def scale(self) -> float:
@@ -201,16 +114,6 @@ class ChannelHeader:
         assert s is not None, "channel index for edf record column missing"
         return dtype(self.unit_scale) * dtype(self.scale) \
             * (data[s].astype(dtype) + dtype(self.offset))
-
-    def as_bytes(self, key: str, num_bytes: int = None) -> bytes:
-        """Converts `str` representation of self.key to `bytes` instance"""
-        fstring = "{:<%i}" % num_bytes if num_bytes else "{}"
-        return bytes(fstring.format(getattr(self, key)), 'latin1')
-
-    def to_bytes(self, key: str, typ=str) -> bytes:
-        att = getattr(self, key)
-        b = bytes(att, 'latin1') if typ is str else bytes(att)
-        return b
 
     def to_string_list(self) -> List[str]:
         return [

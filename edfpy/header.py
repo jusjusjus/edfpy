@@ -1,12 +1,11 @@
 from os import SEEK_SET
-from struct import Struct
 from typing import Optional
 from logging import getLogger
 from datetime import datetime
 
 import numpy as np
 
-from .field import normalize
+# from .field import normalize
 from .header_fields import HeaderFields
 from .channel_header import ChannelHeader
 from .channel_difference import ChannelDifference
@@ -88,6 +87,10 @@ class Header:
         return self.fields.num_channels
 
     @property
+    def num_header_bytes(self) -> int:
+        return self.fields.num_header_bytes
+
+    @property
     def startdatetime(self) -> datetime:
         if not self._startdatetime:
             try:
@@ -103,29 +106,13 @@ class Header:
         return self._startdatetime
 
     def _read_channels(self, file):
-        offset = self.fields.default_num_header_bytes
-        nc = self.num_channels
-        channels = [ChannelHeader(i) for i in range(nc)]
-        for field in ChannelHeader._fields:
-            num_bytes = field.size * nc
-            format_str = (str(field.size) + "s") * nc
-            data = file.read(num_bytes)
-            values = Struct(format_str).unpack(data)
-            normalized = (normalize(field.type, v) for v in values)
-            for c, v in zip(channels, normalized):
-                setattr(c, field.name, v)
-            offset += num_bytes
-
-        assert offset == self.num_header_bytes, f" \
-            invalid header of size {offset} [{self.num_header_bytes}]"
-
+        self.channels = ChannelHeader.read(file, self.num_channels)
         # Add some redundance for fast access
         for key in ('record_duration', 'num_records'):
             att = getattr(self, key)
-            for channel in channels:
+            for channel in self.channels:
                 setattr(channel, key, att)
 
-        self.channels = channels
         self.samples_by_channel = np.array([
             channel.num_samples
             for channel in self.channels
@@ -142,7 +129,7 @@ class Header:
             channel.label: channel.sampling_rate
             for channel in self.channels
         }
-        self.channel_by_label = {c.label: c for c in channels}
+        self.channel_by_label = {c.label: c for c in self.channels}
 
     def set_blob(self, fo):
         pass
@@ -162,54 +149,11 @@ class Header:
 
         return instance
 
-    def as_bytes(self, key: str, num_bytes: int = None):
-        """Converts `str` representation of `self.key` to `bytes` instance"""
-        fstring = "{:<%i}" % num_bytes if num_bytes else "{}"
-        return bytes(fstring.format(getattr(self, key)), 'latin1')
-
-    @property
-    def num_header_bytes(self) -> int:
-        return self.fields.default_num_header_bytes + \
-               self.num_channels * ChannelHeader._num_header_bytes
-
-    @num_header_bytes.setter
-    def num_header_bytes(self, v: int):
-        pass
-
-    def to_bytes(self, channels=None):
-        if channels is not None:
-            channels = sorted([self.channel_by_label[c] for c in channels],
-                              key=lambda c: c.specifier)
-        else:
-            channels = self.channels
-
-        # Temporarily change `self.num_channels`
-        tmp_num_ch = self.num_channels
-        self.num_channels = len(channels)
-        # Main header
-        ret = [
-            self.as_bytes(field.name, field.size)
-            for field in self.fields.fields
-        ]
-        # Channel headers
-        channel_format_str = ''
-        for field in ChannelHeader._fields:
-            channel_format_str += (str(field.size)+'s') * self.num_channels
-            ret += [
-                channel.as_bytes(field.name, num_bytes=field.size)
-                for channel in channels
-            ]
-
-        # Change `self.num_channels` back to original
-        self.num_channels = tmp_num_ch
-        return ret, self.fields.format_str + channel_format_str
-
     def write_file(self, filename: str, close=True, channels=None):
         fo = self.open_if_string(filename, 'wb')
-        blob, format_str = self.to_bytes(channels=channels)
-        packed = Struct(format_str).pack(*blob)
         fo.seek(0, SEEK_SET)
-        fo.write(packed)
+        self.fields.write(fo)
+        ChannelHeader.write(fo, channels)
         if isinstance(filename, str) and close:
             fo.close()
 

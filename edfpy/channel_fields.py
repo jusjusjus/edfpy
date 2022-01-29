@@ -17,6 +17,7 @@ class ChannelFields:
         Field('num_samples_per_record', int, 8),
         Field('reserved', str, 32)
     ]
+    num_header_bytes = 256
 
     def __init__(self, specifier: int, **kwargs):
         self.specifier = specifier
