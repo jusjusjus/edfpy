@@ -1,4 +1,4 @@
-name: check
+name: python 3.9
 on:
   push:
     branches:
