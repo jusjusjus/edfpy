@@ -1,0 +1,61 @@
+name: check
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  types:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: 'Checkout repository'
+        uses: actions/checkout@v2
+
+      - name: 'Setup Python 3.7'
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+
+      - name: 'Install dependencies'
+        run: pip install -r requirements-dev.txt
+
+      - name: 'run type checker'
+        run: make check.types
+
+  style:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: 'Checkout repository'
+        uses: actions/checkout@v2
+
+      - name: 'Setup Python 3.7'
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+
+      - name: 'Install dependencies'
+        run: pip install -r requirements-dev.txt
+
+      - name: 'Run line-indention checker'
+        run: make check.style
+
+  units:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: 'Checkout repository'
+        uses: actions/checkout@v2
+
+      - name: 'Setup Python 3.7'
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+
+      - name: 'Install dependencies'
+        run: make install.dev
+
+      - name: 'Run unit tests'
+        run: make check.units
+...
