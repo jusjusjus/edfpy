@@ -1,5 +1,4 @@
 from typing import List, Union
-import logging
 
 import numpy as np
 
@@ -11,9 +10,6 @@ default_dtype = np.float32
 
 
 class ChannelHeader:
-
-    logger = logging.getLogger(name='ChannelHeader')
-
     _fields = [
         Field('label', str, 16),
         Field('channel_type', str, 80),
@@ -72,20 +68,12 @@ class ChannelHeader:
         self._num_records = v
 
     @property
-    def digital_maximum(self) -> int:
-        return self._digital_maximum
+    def physical_minimum(self) -> float:
+        return self._physical_minimum
 
-    @digital_maximum.setter
-    def digital_maximum(self, v: int):
-        self._digital_maximum = v
-
-    @property
-    def digital_minimum(self) -> int:
-        return self._digital_minimum
-
-    @digital_minimum.setter
-    def digital_minimum(self, v: int):
-        self._digital_minimum = v
+    @physical_minimum.setter
+    def physical_minimum(self, v: float):
+        self._physical_minimum = v
 
     @property
     def physical_maximum(self) -> float:
@@ -96,12 +84,20 @@ class ChannelHeader:
         self._physical_maximum = v
 
     @property
-    def physical_minimum(self) -> float:
-        return self._physical_minimum
+    def digital_minimum(self) -> int:
+        return self._digital_minimum
 
-    @physical_minimum.setter
-    def physical_minimum(self, v: float):
-        self._physical_minimum = v
+    @digital_minimum.setter
+    def digital_minimum(self, v: int):
+        self._digital_minimum = v
+
+    @property
+    def digital_maximum(self) -> int:
+        return self._digital_maximum
+
+    @digital_maximum.setter
+    def digital_maximum(self, v: int):
+        self._digital_maximum = v
 
     @property
     def record_duration(self) -> int:
