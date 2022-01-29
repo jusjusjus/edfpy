@@ -17,6 +17,32 @@ class Header(HeaderFields):
         super().__init__(*args, **kwargs)
         self._startdatetime: Optional[datetime] = None
 
+    @property
+    def startdatetime(self) -> datetime:
+        if not self._startdatetime:
+            try:
+                self._startdatetime = datetime.strptime(
+                    self.startdate + "-" + self.starttime, "%d.%m.%y-%H.%M.%S"
+                )
+            except BaseException:  # sometimes the day and month are switched
+                self.logger.info("Time format seems to be MON.DAY.YEAR")
+                self._startdatetime = datetime.strptime(
+                    self.startdate + "-" + self.starttime, "%m.%d.%y-%H.%M.%S"
+                )
+
+        return self._startdatetime
+
+    def build_channel_differences(self, depth: int = 1):
+        for _ in range(depth):
+            self._build_channel_differences()
+
+    def add_synonym(self, synonym: str, label: str):
+        """add a `synonym` for a channel `label`"""
+        channel = self.channel_by_label[label]
+        sampling_rate = self.sampling_rate_by_label[label]
+        self.channel_by_label[synonym] = channel
+        self.sampling_rate_by_label[synonym] = sampling_rate
+
     def _build_channel_differences(self):
         channels = list(self.channel_by_label.values())
         for index, left in enumerate(channels):
@@ -33,31 +59,32 @@ class Header(HeaderFields):
         self.channel_by_label[channel.label] = channel
         self.sampling_rate_by_label[channel.label] = channel.sampling_rate
 
-    def add_synonym(self, synonym: str, label: str):
-        """add a `synonym` for a channel `label`"""
-        channel = self.channel_by_label[label]
-        sampling_rate = self.sampling_rate_by_label[label]
-        self.channel_by_label[synonym] = channel
-        self.sampling_rate_by_label[synonym] = sampling_rate
+    @classmethod
+    def read_file(cls, filename: str, keep_open: bool = True):
+        fo = cls.open_if_string(filename, 'rb')
+        fo.seek(0, SEEK_SET)
+        instance = cls.read(fo)
+        instance._read_channels(fo)
+        if keep_open:
+            instance.set_blob(fo)
+        else:
+            fo.close()
+            instance.set_blob(filename)
 
-    def build_channel_differences(self, depth: int = 1):
-        for _ in range(depth):
-            self._build_channel_differences()
+        return instance
 
-    @property
-    def startdatetime(self) -> datetime:
-        if not self._startdatetime:
-            try:
-                self._startdatetime = datetime.strptime(
-                    self.startdate + "-" + self.starttime, "%d.%m.%y-%H.%M.%S"
-                )
-            except BaseException:  # sometimes the day and month are switched
-                self.logger.info("Time format seems to be MON.DAY.YEAR")
-                self._startdatetime = datetime.strptime(
-                    self.startdate + "-" + self.starttime, "%m.%d.%y-%H.%M.%S"
-                )
+    @staticmethod
+    def open_if_string(f, mode):
+        if isinstance(f, str):
+            fo = open(f, mode)
+        else:
+            fo = f
 
-        return self._startdatetime
+        for m in ('read', 'seek'):
+            assert hasattr(fo, m), "Missing property in \
+                    file ['{}', '{}', '{}']".format(m, f, fo)
+
+        return fo
 
     def _read_channels(self, file):
         self.channels = ChannelHeader.read(file, self.num_channels)
@@ -88,20 +115,6 @@ class Header(HeaderFields):
     def set_blob(self, fo):
         pass
 
-    @classmethod
-    def read_file(cls, filename: str, keep_open: bool = True):
-        fo = cls.open_if_string(filename, 'rb')
-        fo.seek(0, SEEK_SET)
-        instance = cls.read(fo)
-        instance._read_channels(fo)
-        if keep_open:
-            instance.set_blob(fo)
-        else:
-            fo.close()
-            instance.set_blob(filename)
-
-        return instance
-
     def write_file(self, filename: str, close=True, channels=None):
         fo = self.open_if_string(filename, 'wb')
         fo.seek(0, SEEK_SET)
@@ -109,19 +122,6 @@ class Header(HeaderFields):
         ChannelHeader.write(fo, channels)
         if isinstance(filename, str) and close:
             fo.close()
-
-        return fo
-
-    @staticmethod
-    def open_if_string(f, mode):
-        if isinstance(f, str):
-            fo = open(f, mode)
-        else:
-            fo = f
-
-        for m in ('read', 'seek'):
-            assert hasattr(fo, m), "Missing property in \
-                    file ['{}', '{}', '{}']".format(m, f, fo)
 
         return fo
 
