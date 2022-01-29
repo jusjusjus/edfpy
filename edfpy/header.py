@@ -5,17 +5,16 @@ from datetime import datetime
 
 import numpy as np
 
-# from .field import normalize
 from .header_fields import HeaderFields
 from .channel_header import ChannelHeader
 from .channel_difference import ChannelDifference
 
 
-class Header:
+class Header(HeaderFields):
     logger = getLogger(name='Header')
 
-    def __init__(self, fields: HeaderFields):
-        self.fields = fields
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._startdatetime: Optional[datetime] = None
 
     def _build_channel_differences(self):
@@ -44,51 +43,6 @@ class Header:
     def build_channel_differences(self, depth: int = 1):
         for _ in range(depth):
             self._build_channel_differences()
-
-    @property
-    def version(self) -> str:
-        return self.fields.version
-
-    @property
-    def patient_id(self) -> str:
-        return self.fields.patient_id
-
-    @property
-    def recording_id(self) -> str:
-        return self.fields.recording_id
-
-    @property
-    def startdate(self) -> str:
-        """Local start date of the recording"""
-        return self.fields.startdate
-
-    @property
-    def starttime(self) -> str:
-        """Local start time of the recording"""
-        return self.fields.starttime
-
-    @property
-    def reserved(self) -> str:
-        return self.fields.reserved
-
-    @property
-    def num_records(self) -> int:
-        """returns number of records"""
-        return self.fields.num_records
-
-    @property
-    def record_duration(self) -> int:
-        """returns seconds per record"""
-        return self.fields.record_duration
-
-    @property
-    def num_channels(self) -> int:
-        """returns seconds per record"""
-        return self.fields.num_channels
-
-    @property
-    def num_header_bytes(self) -> int:
-        return self.fields.num_header_bytes
 
     @property
     def startdatetime(self) -> datetime:
@@ -138,8 +92,7 @@ class Header:
     def read_file(cls, filename: str, keep_open: bool = True):
         fo = cls.open_if_string(filename, 'rb')
         fo.seek(0, SEEK_SET)
-        fields = HeaderFields.read(fo)
-        instance = cls(fields)
+        instance = cls.read(fo)
         instance._read_channels(fo)
         if keep_open:
             instance.set_blob(fo)
@@ -152,7 +105,7 @@ class Header:
     def write_file(self, filename: str, close=True, channels=None):
         fo = self.open_if_string(filename, 'wb')
         fo.seek(0, SEEK_SET)
-        self.fields.write(fo)
+        self.write(fo)
         ChannelHeader.write(fo, channels)
         if isinstance(filename, str) and close:
             fo.close()
