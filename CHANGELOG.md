@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.1] - 2022-01-29
 
+### Added
+
+- gha for style/type/unit checks for py37,38,39,310
+- this CHANGELOG
+- test for `Header.build_channel_differences()`
+
+### Changed
+
+- pytest to v6.2.5
+
+### Fixed
+
+- add built channel differences also to `.sampling_rate_by_label`
+
+
 [Unreleased]: https://github.com/jusjusjus/edfpy/compare/v0.1.1...HEAD
 [0.1.1]: https://github.com/jusjusjus/edfpy/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/jusjusjus/edfpy/releases/tag/v0.1.0
