@@ -19,14 +19,9 @@ class ChannelFields:
     ]
     num_header_bytes = 256
 
-    def __init__(self, specifier: int, **kwargs):
-        self.specifier = specifier
+    def __init__(self, *args, **kwargs):
         for k, v in kwargs.items():
-            try:
-                # Accessing `prop.setter` through class property
-                getattr(type(self), k).fset(self, v)
-            except AttributeError:
-                setattr(self, k, v)
+            getattr(type(self), k).fset(self, v)
 
     @property
     def label(self) -> str:

@@ -18,6 +18,7 @@ class ChannelHeader(ChannelFields):
             typically the reference index in a data blob.
         """
         super().__init__(specifier, **kwargs)
+        self.specifier = specifier
         self._sampling_rate = None
         self._num_samples = None
         self._offset = None
