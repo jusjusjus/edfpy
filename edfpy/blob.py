@@ -4,6 +4,20 @@ from contextlib import contextmanager
 
 import numpy as np
 
+from .channel_fields import ChannelFields
+
+
+def read_blob(filish, offset: int, record_lengths: List[int]):
+    memarr = np.memmap(filish, dtype='<i2', mode='r', offset=offset)
+    pos = np.cumsum([0] + record_lengths).astype(int)
+    memarr.shape = (-1, pos[-1])
+    locs = zip(pos[:-1], pos[1:])
+    return [memarr[:, i:j].flatten() for i, j in locs]
+
+
+def write_blob(file, channels: List[ChannelFields]):
+    pass
+
 
 class Blob:
 
@@ -44,13 +58,12 @@ class Blob:
         """
         assert sl.step is None, "We don't resample like that."
         n = self.samples_per_record
-        N = self.records
-        b = self._bytes_per_sample
+        bytes_per_record = self._bytes_per_sample * n
         start = 0 if sl.start is None else sl.start
-        stop = N if sl.stop is None else sl.stop
-        ds = stop-start
-        offset = int(b*start*n + self.offset)
-        readsize = int(b*ds*n)
+        stop = self.records if sl.stop is None else sl.stop
+        ds = stop - start
+        offset = bytes_per_record * start + self.offset
+        readsize = bytes_per_record * ds
         shp = (ds, n)
         with self.file() as fo:
             fo.seek(offset, SEEK_SET)
