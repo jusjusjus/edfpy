@@ -2,7 +2,26 @@ from typing import List
 import logging
 import numpy as np
 from .header import Header
-from .blob import Blob
+from .blob import Blob, read_blob
+from .header_fields import HeaderFields
+from .channel_fields import ChannelFields
+
+
+class Reader:
+    def __init__(self, filepath: str):
+        self.filepath = filepath
+        with open(filepath, 'rb') as fp:
+            self.header = HeaderFields.read(fp)
+            self.channels = ChannelFields.read(fp, self.header.num_channels)
+
+        offset = self.header.num_header_bytes
+        record_lengths = [c.num_samples_per_record for c in self.channels]
+        self.signals = read_blob(filepath, offset, record_lengths)
+
+    @property
+    def duration(self) -> float:
+        """Returns total duration of the recording in seconds."""
+        return self.header.record_duration * self.header.num_records
 
 
 class EDF(Header):

@@ -4,19 +4,19 @@ from contextlib import contextmanager
 
 import numpy as np
 
-from .channel_fields import ChannelFields
 
-
-def read_blob(filish, offset: int, record_lengths: List[int]):
-    memarr = np.memmap(filish, dtype='<i2', mode='r', offset=offset)
+def read_blob(file, offset: int, record_lengths: List[int]):
+    memarr = np.memmap(file, dtype='<i2', mode='r', offset=offset)
     pos = np.cumsum([0] + record_lengths).astype(int)
     memarr.shape = (-1, pos[-1])
     locs = zip(pos[:-1], pos[1:])
     return [memarr[:, i:j].flatten() for i, j in locs]
 
 
-def write_blob(file, channels: List[ChannelFields]):
-    pass
+def write_blob(file, arrs: List[np.ndarray], record_lengths: List[int]):
+    reshaped = [arr.reshape((-1, n)) for arr, n in zip(arrs, record_lengths)]
+    blob = np.concatenate(reshaped, axis=1).tobytes()
+    file.write(blob)
 
 
 class Blob:
