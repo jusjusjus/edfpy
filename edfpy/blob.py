@@ -8,16 +8,26 @@ import numpy as np
 class BlobSlice:
     def __init__(self, blob: np.memmap, locs: Tuple[int, int]):
         self.blob = blob
+        self.block_size = locs[1] - locs[0]
+        self.length = blob.shape[0] * self.block_size
         self.locs = slice(*locs)
 
-    def __getitem__(self, sl):
-        return self.blob[sl, self.locs].flatten()
+    def __getitem__(self, sl: slice) -> np.ndarray:
+        q = self.block_size
+        i = sl.start if sl.start else 0
+        j = sl.stop if sl.stop else self.length
+        A = i // q
+        B = int(np.ceil(j / q))
+        a = A * q - i
+        b = B * q - j or None
+        block = self.blob[A:B, self.locs].flatten()
+        return block[a:b]
 
     def __eq__(self, other):
         return self[:] == other
 
     def __repr__(self):
-        return f"BlobSlice({self[0]})"
+        return f"BlobSlice({self[:]})"
 
 
 def read_blob(file, offset: int, record_lengths: List[int]):
