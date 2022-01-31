@@ -1,7 +1,8 @@
-from typing import List, BinaryIO
+from typing import List, BinaryIO, Optional
 from struct import Struct
 
 from .field import Field, normalize, serialize
+from .blob import BlobSlice
 
 
 class ChannelFields:
@@ -17,9 +18,9 @@ class ChannelFields:
         Field('num_samples_per_record', int, 8),
         Field('reserved', str, 32)
     ]
-    num_header_bytes = 256
 
     def __init__(self, *args, **kwargs):
+        self.signal: Optional[BlobSlice] = None
         for k, v in kwargs.items():
             getattr(type(self), k).fset(self, v)
 

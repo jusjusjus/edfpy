@@ -18,7 +18,9 @@ class Reader:
 
         offset = self.header.num_header_bytes
         record_lengths = [c.num_samples_per_record for c in self.channels]
-        self.signals = read_blob(filepath, offset, record_lengths)
+        blob_slices = read_blob(filepath, offset, record_lengths)
+        for channel, blob_slice in zip(self.channels, blob_slices):
+            channel.signal = blob_slice
 
     @property
     def duration(self) -> int:
