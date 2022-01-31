@@ -1,16 +1,32 @@
 from os import SEEK_SET
-from typing import List, Iterable
+from typing import List, Iterable, Tuple
 from contextlib import contextmanager
 
 import numpy as np
 
 
+class BlobSlice:
+    def __init__(self, blob: np.memmap, locs: Tuple[int, int]):
+        self.blob = blob
+        self.locs = slice(*locs)
+
+    def __getitem__(self, sl):
+        return self.blob[sl, self.locs].flatten()
+
+    def __eq__(self, other):
+        return self[:] == other
+
+    def __repr__(self):
+        return f"BlobSlice({self[0]})"
+
+
 def read_blob(file, offset: int, record_lengths: List[int]):
-    memarr = np.memmap(file, dtype='<i2', mode='r', offset=offset)
+    memarr = np.memmap(file, dtype='<i2',  # type: ignore
+                       mode='r', offset=offset)
     pos = np.cumsum([0] + record_lengths).astype(int)
     memarr.shape = (-1, pos[-1])
     locs = zip(pos[:-1], pos[1:])
-    return [memarr[:, i:j].flatten() for i, j in locs]
+    return [BlobSlice(memarr, loc) for loc in locs]
 
 
 def write_blob(file, arrs: List[np.ndarray], record_lengths: List[int]):
