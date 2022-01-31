@@ -1,7 +1,5 @@
 from os import SEEK_SET
-from typing import Optional
 from logging import getLogger
-from datetime import datetime
 
 import numpy as np
 
@@ -15,22 +13,6 @@ class Header(HeaderFields):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._startdatetime: Optional[datetime] = None
-
-    @property
-    def startdatetime(self) -> datetime:
-        if not self._startdatetime:
-            try:
-                self._startdatetime = datetime.strptime(
-                    self.startdate + "-" + self.starttime, "%d.%m.%y-%H.%M.%S"
-                )
-            except BaseException:  # sometimes the day and month are switched
-                self.logger.info("Time format seems to be MON.DAY.YEAR")
-                self._startdatetime = datetime.strptime(
-                    self.startdate + "-" + self.starttime, "%m.%d.%y-%H.%M.%S"
-                )
-
-        return self._startdatetime
 
     def build_channel_differences(self, depth: int = 1):
         for _ in range(depth):

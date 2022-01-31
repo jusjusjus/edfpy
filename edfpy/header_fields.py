@@ -1,7 +1,9 @@
 from io import SEEK_SET
 from struct import Struct
 from typing import BinaryIO
+from datetime import datetime
 
+from .cached_property import cached_property
 from .field import Field, normalize, serialize
 
 
@@ -112,6 +114,15 @@ class HeaderFields:
     def __init__(self, *args, **kwargs):
         for k, v in kwargs.items():
             getattr(type(self), k).fset(self, v)
+
+    @cached_property
+    def startdatetime(self) -> datetime:
+        datetime_str = f"{self.startdate}-{self.starttime}"
+        try:
+            return datetime.strptime(datetime_str, '%d.%m.%y-%H.%M.%S')
+        except BaseException:
+            # sometimes the day and month are switched
+            return datetime.strptime(datetime_str, '%m.%d.%y-%H.%M.%S')
 
     @classmethod
     def read(cls, file: BinaryIO):

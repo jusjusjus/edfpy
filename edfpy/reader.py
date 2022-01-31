@@ -1,4 +1,5 @@
 from typing import List
+from datetime import datetime
 import logging
 import numpy as np
 from .header import Header
@@ -9,6 +10,7 @@ from .channel_fields import ChannelFields
 
 class Reader:
     def __init__(self, filepath: str):
+        """read filepath"""
         self.filepath = filepath
         with open(filepath, 'rb') as fp:
             self.header = HeaderFields.read(fp)
@@ -19,9 +21,14 @@ class Reader:
         self.signals = read_blob(filepath, offset, record_lengths)
 
     @property
-    def duration(self) -> float:
-        """Returns total duration of the recording in seconds."""
+    def duration(self) -> int:
+        """returns recording duration in seconds"""
         return self.header.record_duration * self.header.num_records
+
+    @property
+    def startdatetime(self) -> datetime:
+        """returns the time point of recording start"""
+        return self.header.startdatetime
 
 
 class EDF(Header):
