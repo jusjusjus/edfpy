@@ -7,7 +7,7 @@ from .field import Field, normalize, serialize
 from .blob import BlobSlice
 
 
-class ChannelFields:
+class Channel:
     fields = [
         Field('label', str, 16),
         Field('channel_type', str, 80),
@@ -116,7 +116,7 @@ class ChannelFields:
         self._reserved = normalize(str, v)
 
     @classmethod
-    def read(cls, file: BinaryIO, num_channels: int) -> List['ChannelFields']:
+    def read(cls, file: BinaryIO, num_channels: int) -> List['Channel']:
         channels = [cls(i) for i in range(num_channels)]
         for field in cls.fields:
             data = file.read(field.size * num_channels)
@@ -129,7 +129,7 @@ class ChannelFields:
         return channels
 
     @classmethod
-    def write(cls, file: BinaryIO, channels: List['ChannelFields']):
+    def write(cls, file: BinaryIO, channels: List['Channel']):
         serialized = b''
         for field in cls.fields:
             serialized += b''.join([

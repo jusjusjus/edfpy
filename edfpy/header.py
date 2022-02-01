@@ -7,7 +7,7 @@ from .cached_property import cached_property
 from .field import Field, normalize, serialize
 
 
-class HeaderFields:
+class Header:
     fields = [
         Field('version', str, 8),
         Field('patient_id', str, 80),

@@ -1,8 +1,8 @@
 from datetime import datetime
 import numpy as np
 from .blob import read_blob
-from .header_fields import HeaderFields
-from .channel_fields import ChannelFields
+from .header import Header
+from .channel import Channel
 
 
 class Reader:
@@ -10,8 +10,8 @@ class Reader:
         """read filepath"""
         self.filepath = filepath
         with open(filepath, 'rb') as fp:
-            self.header = HeaderFields.read(fp)
-            self.channels = ChannelFields.read(fp, self.header.num_channels)
+            self.header = Header.read(fp)
+            self.channels = Channel.read(fp, self.header.num_channels)
 
         offset = self.header.num_header_bytes
         record_lengths = [c.num_samples_per_record for c in self.channels]

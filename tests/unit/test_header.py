@@ -1,9 +1,9 @@
 from io import BytesIO
 from datetime import datetime
-from edfpy.header_fields import HeaderFields
+from edfpy.header import Header
 
 
-def test_read(test_header_field_bytes):
+def test_read(test_header_bytes):
     """test read header-field bytes from file"""
     expected = {
         'version': '0',
@@ -18,15 +18,15 @@ def test_read(test_header_field_bytes):
         'num_channels': 5,
     }
     expected_dt = datetime(2002, 2, 4, 22, 7, 23)
-    file = BytesIO(test_header_field_bytes)
-    fields = HeaderFields.read(file)
+    file = BytesIO(test_header_bytes)
+    fields = Header.read(file)
     for key in expected:
         assert getattr(fields, key) == expected[key], key
 
     assert fields.startdatetime == expected_dt
 
 
-def test_write(test_header_field_bytes):
+def test_write(test_header_bytes):
     expected = {
         'version': '0',
         'patient_id': 'brux2',
@@ -39,12 +39,12 @@ def test_write(test_header_field_bytes):
         'record_duration': 1,
         'num_channels': 5,
     }
-    fields = HeaderFields(**expected)
+    fields = Header(**expected)
     file = BytesIO()
     fields.write(file)
     file.seek(0)
     content = file.read(256)
-    assert content == test_header_field_bytes
+    assert content == test_header_bytes
 
 
 def test_roundtrip():
@@ -61,11 +61,11 @@ def test_roundtrip():
         'num_channels': 3,
     }
     expected_dt = datetime(1984, 2, 18, 11, 11, 0)
-    fields = HeaderFields(**expected)
+    fields = Header(**expected)
     assert expected_dt == fields.startdatetime
     file = BytesIO()
     fields.write(file)
     file.seek(0)
-    fields = HeaderFields.read(file)
+    fields = Header.read(file)
     for key in expected:
         assert getattr(fields, key) == expected[key], key
