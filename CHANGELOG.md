@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Reader API to read EDF files with minimal memory footprint
+
+### Removed
+
+- `EDF`
+- `Header.build_channel_differences()`
+
 ## [0.1.1] - 2022-01-29
 
 ### Added
