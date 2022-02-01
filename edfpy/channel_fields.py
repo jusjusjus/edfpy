@@ -1,6 +1,8 @@
 from typing import List, BinaryIO, Optional
 from struct import Struct
 
+import numpy as np
+
 from .field import Field, normalize, serialize
 from .blob import BlobSlice
 
@@ -23,6 +25,15 @@ class ChannelFields:
         self.signal: Optional[BlobSlice] = None
         for k, v in kwargs.items():
             getattr(type(self), k).fset(self, v)
+
+    def __getitem__(self, sli: slice) -> np.ndarray:
+        """return a slice of the signal"""
+        if self.signal is None:
+            raise RuntimeError(f"channel {self} uninitialized")
+
+        scale = (self.physmax - self.physmin) / (self.digimax - self.digimin)
+        offset = self.physmax / scale - self.digimax
+        return scale * (self.signal[sli] + offset)
 
     @property
     def label(self) -> str:
@@ -50,35 +61,35 @@ class ChannelFields:
 
     @property
     def physical_minimum(self) -> float:
-        return self._physical_minimum
+        return self.physmin
 
     @physical_minimum.setter
     def physical_minimum(self, v: float):
-        self._physical_minimum = v
+        self.physmin = v
 
     @property
     def physical_maximum(self) -> float:
-        return self._physical_maximum
+        return self.physmax
 
     @physical_maximum.setter
     def physical_maximum(self, v: float):
-        self._physical_maximum = v
+        self.physmax = v
 
     @property
     def digital_minimum(self) -> int:
-        return self._digital_minimum
+        return self.digimin
 
     @digital_minimum.setter
     def digital_minimum(self, v: int):
-        self._digital_minimum = v
+        self.digimin = v
 
     @property
     def digital_maximum(self) -> int:
-        return self._digital_maximum
+        return self.digimax
 
     @digital_maximum.setter
     def digital_maximum(self, v: int):
-        self._digital_maximum = v
+        self.digimax = v
 
     @property
     def prefiltering(self) -> str:

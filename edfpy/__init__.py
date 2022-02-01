@@ -1,5 +1,3 @@
-from .reader import EDF
-from .header import Header
-from .header import ChannelHeader
+from .reader import Reader
 
-__all__ = ['EDF', 'Header', 'ChannelHeader']
+__all__ = ['Reader']
