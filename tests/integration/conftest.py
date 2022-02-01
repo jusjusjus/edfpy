@@ -1,19 +1,10 @@
 from os.path import join, exists, dirname
 
-import pytest
-
-from edfpy.header import Header
+from pytest import fixture
 
 
-@pytest.fixture
+@fixture
 def sample_filepath(filename):
     filepath = join(dirname(__file__), '..', '..', 'examples', filename)
     assert exists(filepath), f"File {filepath} not existent"
     return filepath
-
-
-@pytest.fixture
-def header(filename):
-    filepath = join(dirname(__file__), '..', '..', 'examples', filename)
-    assert exists(filepath), f"File {filepath} not existent"
-    return Header.read_file(filepath)
