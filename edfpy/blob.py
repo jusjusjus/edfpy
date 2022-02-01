@@ -13,13 +13,17 @@ class BlobSlice:
         self.locs = slice(*locs)
 
     def __getitem__(self, sl: slice) -> np.ndarray:
+        if sl.step and sl.step != 1:
+            raise ValueError('slicing only with step width 1')
+
         q = self.block_size
         i = sl.start if sl.start else 0
         j = sl.stop if sl.stop else self.length
+        j = self.length + j if j < 0 else j
         A = i // q
         B = int(np.ceil(j / q))
-        a = A * q - i
-        b = B * q - j or None
+        a = i - A * q
+        b = j - B * q or None
         block = self.blob[A:B, self.locs].flatten()
         return block[a:b]
 
