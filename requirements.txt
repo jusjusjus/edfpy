@@ -1,1 +1,2 @@
 numpy>=1.14.1
+cached-property>=1.5.2

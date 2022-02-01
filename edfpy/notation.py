@@ -1,5 +1,6 @@
 import re
 from typing import Dict, Optional
+from .cached_property import cached_property
 
 
 channel_labels_by_type = dict(
@@ -175,19 +176,6 @@ synonyms.update(**{
 channel_type_by_label: Dict[str, str] = {}
 for channel_type, channels in channel_labels_by_type.items():
     channel_type_by_label.update({ch: channel_type for ch in channels})
-
-
-def cached_property(fn):
-    attr_name = '_cached_'+fn.__name__
-
-    @property
-    def _cached_property(self):
-        if not hasattr(self, attr_name):
-            setattr(self, attr_name, fn(self))
-
-        return getattr(self, attr_name)
-
-    return _cached_property
 
 
 class Label(str):
