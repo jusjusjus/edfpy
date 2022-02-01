@@ -1,3 +1,4 @@
+from typing import List, Dict
 from datetime import datetime
 import numpy as np
 from .blob import read_blob
@@ -7,7 +8,7 @@ from .channel import Channel
 
 class Reader:
     def __init__(self, filepath: str):
-        """read filepath"""
+        """initialize reader with a filepath"""
         self.filepath = filepath
         with open(filepath, 'rb') as fp:
             self.header = Header.read(fp)
@@ -33,10 +34,15 @@ class Reader:
         """returns the time point of recording start"""
         return self.header.startdatetime
 
-    def get_physical_samples(self, t0: float = 0.0, dt: float = None):
-        """Return digital samples from `t0` to `t0+dt`."""
+    def get_physical_samples(self, t0: float = 0.0, dt: float = None,
+                             labels: List[str] = None) -> Dict[str, np.ndarray]:  # noqa: E501
+        """returns dict of samples from `t0` to `t0+dt`."""
         sr = self.sampling_rates
         dt = dt or self.duration
         A = np.round(t0 * sr).astype(int)
         B = np.round((t0 + dt) * sr).astype(int)
-        return [c[a:b] for c, a, b in zip(self.channels, A, B)]
+        return {
+            c.label: c[a:b]
+            for c, a, b in zip(self.channels, A, B)
+            if (labels is None or c.label in labels)
+        }

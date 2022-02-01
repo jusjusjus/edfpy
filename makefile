@@ -7,6 +7,7 @@ check.style:
 	flake8
 
 check.units:
+	-unzip examples/sample.csv.zip -d examples
 	python -m pytest
 
 install.dev:
