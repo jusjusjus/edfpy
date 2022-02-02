@@ -8,7 +8,9 @@ check.style:
 
 check.units:
 	-unzip examples/sample.csv.zip -d examples
+	-unzip examples/sample2.csv.zip -d examples
 	python -m pytest
+	-rm examples/*csv
 
 install.dev:
 	pip install \

@@ -26,10 +26,13 @@ def test_startdatetime(sample_filepath, startdatetime):
     assert reader.startdatetime == startdatetime
 
 
-@pytest.mark.parametrize('filename', ['sample.edf'])
-def test_get_physical_samples_subset(sample_filepath):
+@pytest.mark.parametrize('filename, channel', [
+    ('sample.edf', 'Fp2-F4'),
+    ('sample2.edf', 'C4-A1'),
+])
+def test_get_physical_samples_subset(sample_filepath, channel):
     """test Reader.startdatetime"""
-    expected = ['Fp2-F4']
+    expected = [channel]
     reader = Reader(sample_filepath)
     signals = reader.get_physical_samples(labels=expected)
     assert set(signals.keys()) == set(expected)
@@ -37,7 +40,7 @@ def test_get_physical_samples_subset(sample_filepath):
     assert np.all(signals[expected[0]] == other[expected[0]])
 
 
-@pytest.mark.parametrize('filename', ['sample.edf'])
+@pytest.mark.parametrize('filename', ['sample.edf', 'sample2.edf'])
 def test_get_physical_samples(sample_filepath, sample_data):
     """test Reader.startdatetime"""
     reader = Reader(sample_filepath)
@@ -49,7 +52,7 @@ def test_get_physical_samples(sample_filepath, sample_data):
         assert signal == pytest.approx(expected, rel=1e-4), label
 
 
-@pytest.mark.parametrize('filename', ['sample.edf'])
+@pytest.mark.parametrize('filename', ['sample.edf', 'sample2.edf'])
 def test_get_physical_samples_in_range(sample_filepath, sample_data):
     """test Reader.startdatetime"""
     t0, dt = 1.0, 0.503  # seconds
