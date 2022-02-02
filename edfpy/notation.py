@@ -191,8 +191,36 @@ class Label(str):
         normalized = cls.normalize(label)
         return super().__new__(cls, normalized)
 
+    def __init__(self, original: str):
+        self.original = original
+
+    @cached_property
+    def left(self) -> str:
+        """returns left part of the label"""
+        return self.split('-')[0]
+
+    @cached_property
+    def right(self) -> Optional[str]:
+        """returns right part of the label if existent"""
+        parts = self.split('-')
+        return None if len(parts) < 2 else parts[1]
+
+    @cached_property
+    def type(self):
+        return channel_type_by_label.get(
+            self.left, self.prefix_type)
+
     @classmethod
     def normalize(cls, original: str) -> str:
+        """returns string normalized with synonyms
+
+        - replaces '/' with '-'
+          Example: 'F1/A1' -> 'F1-A1'
+        - if there are spaces, returns the second part
+          Example: 'EEG F1/A1' -> 'F1-A1'
+        - replaces each part of a '-' split from synonyms
+          Example: 'E1-A1' -> 'EOG_L-M1'
+        """
         split = original.replace('/', '-').upper().split(' ')
         label = split[1] if 1 < len(split) else split[0]
         synonym_tuple = (
@@ -200,14 +228,6 @@ class Label(str):
             for part in label.split('-')
         )
         return '-'.join(synonym_tuple)
-
-    def __init__(self, original: str):
-        self.original = original
-
-    @cached_property
-    def type(self):
-        return channel_type_by_label.get(
-            self.left, self.prefix_type)
 
     def is_type(self, other) -> bool:
         return self.type == 'REF' or other == 'REF' or self.type == other
@@ -224,23 +244,6 @@ class Label(str):
                 return m.group(0)
 
         return None
-
-    @cached_property
-    def left(self) -> Optional[str]:
-        try:
-            return self.split('-')[0]
-        except BaseException:
-            return None
-
-    @cached_property
-    def right(self) -> Optional[str]:
-        try:
-            return self.split('-')[1]
-        except BaseException:
-            return None
-
-    def reference(self) -> Optional[str]:
-        return self.right
 
     def __sub__(self, right):
         assert right.is_type(self.type), "illegal sub (%s[%s])-(%s[%s])" % \
