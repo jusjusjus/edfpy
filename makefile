@@ -7,9 +7,12 @@ check.style:
 	flake8
 
 check.units:
+	python -m pytest tests/unit
+
+check.integration:
 	-unzip examples/sample.csv.zip -d examples
 	-unzip examples/sample2.csv.zip -d examples
-	python -m pytest
+	python -m pytest tests/integration
 	-rm examples/*csv
 
 install.dev:

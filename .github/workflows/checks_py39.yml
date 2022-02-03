@@ -58,4 +58,7 @@ jobs:
 
       - name: 'Run unit tests'
         run: make check.units
+
+      - name: 'Run integration tests'
+        run: make check.integration
 ...
