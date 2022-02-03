@@ -1,7 +1,7 @@
 import re
 from typing import Dict, Optional
-from .cached_property import cached_property
 
+from .cached_property import cached_property
 
 channel_labels_by_type = dict(
     REF=[

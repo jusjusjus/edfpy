@@ -3,8 +3,8 @@ from struct import Struct
 
 import numpy as np
 
-from .field import Field, normalize, serialize
 from .blob import BlobSlice
+from .field import Field, normalize, serialize
 
 
 class Channel:

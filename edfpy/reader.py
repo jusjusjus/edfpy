@@ -36,7 +36,7 @@ class Reader:
 
     def get_physical_samples(self, t0: float = 0.0, dt: float = None,
                              labels: List[str] = None) -> Dict[str, np.ndarray]:  # noqa: E501
-        """returns dict of samples from `t0` to `t0+dt`."""
+        """returns dict of samples by label from `t0` to `t0+dt`."""
         sr = self.sampling_rates
         dt = dt or self.duration
         A = np.round(t0 * sr).astype(int)
