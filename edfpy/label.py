@@ -20,14 +20,6 @@ class Label(str):
 
         return parts
 
-    def reference(self, other):
-        if self.left == other.right or self.right == other.left:
-            return self + other
-        elif self.left == other.left or self.right == other.right:
-            return self - other
-
-        raise ValueError(f"Can't reference {self} with {other}")
-
     def __add__(self, other):
         cls = type(self)
         if self.right == other.left:
