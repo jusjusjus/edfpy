@@ -1,13 +1,15 @@
+from typing import Optional
+
 from .cached_property import cached_property
 
 
 class Label(str):
     @property
-    def left(self):
+    def left(self) -> Optional[str]:
         return self.parts[0]
 
     @cached_property
-    def right(self):
+    def right(self) -> Optional[str]:
         return self.parts[1]
 
     @cached_property
@@ -20,25 +22,23 @@ class Label(str):
 
         return parts
 
-    def __add__(self, other):
-        cls = type(self)
+    def __add__(self, other: 'Label') -> 'Label':  # type: ignore
         if self.right == other.left:
-            return cls.from_channels(self.left, other.right)
+            return self.from_channels(self.left, other.right)
         elif self.left == other.right:
-            return cls.from_channels(other.left, self.right)
+            return self.from_channels(other.left, self.right)
 
         raise ValueError(f"Can't add {self} and {other}")
 
-    def __sub__(self, other):
-        cls = type(self)
+    def __sub__(self, other: 'Label') -> 'Label':
         if self.left == other.left:
-            return cls.from_channels(other.right, self.right)
+            return self.from_channels(other.right, self.right)
         elif self.right == other.right:
-            return cls.from_channels(self.left, other.left)
+            return self.from_channels(self.left, other.left)
 
         raise ValueError(f"Can't subtract {other} from {self}")
 
-    def has_common_part(self, o):
+    def has_common_part(self, o: 'Label') -> bool:
         p = self.parts
         return o.left in p or o.right in p
 
@@ -46,7 +46,7 @@ class Label(str):
         return self.from_channels(self.right, self.left)
 
     @classmethod
-    def from_channels(cls, c1, c2):
-        left = c1 or ''
-        right = f"-{c2}" if c2 else ''
+    def from_channels(cls, c1: Optional[str], c2: Optional[str]) -> 'Label':
+        left: str = c1 or ''
+        right: str = f"-{c2}" if c2 else ''
         return cls(f"{left}{right}")
