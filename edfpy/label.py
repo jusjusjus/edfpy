@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple
 
 from .cached_property import cached_property
 
@@ -21,6 +21,15 @@ class Label(str):
             parts[0] = None
 
         return parts
+
+    def derive(self, other: 'Label') -> Tuple['Label', str]:
+        if not self.is_compatible(other):
+            raise ValueError(f"Unable to derive {self} with {other}")
+
+        try:
+            return self + other, '+'
+        except ValueError:
+            return self - other, '-'
 
     def __add__(self, other: 'Label') -> 'Label':  # type: ignore
         if self.right == other.left:

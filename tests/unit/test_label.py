@@ -15,7 +15,7 @@ def test_parts_left_right(label, expected):
     assert lab.parts == expected
 
 
-@pytest.mark.parametrize('label1, label2, expected', [
+@pytest.mark.parametrize('first, second, expected', [
     (Label('F4-F8'), Label('T4-T8'), False),
     (Label('F4'), Label('T4-T8'), False),
     (Label('F4-T4'), Label('T4-T8'), True),
@@ -27,9 +27,9 @@ def test_parts_left_right(label, expected):
     (Label('T8'), Label('T4'), True),
     (Label('-T8'), Label('T4'), True),
 ])
-def test_has_common_parts(label1, label2, expected):
-    assert label1.is_compatible(label2) == expected
-    assert label2.is_compatible(label1) == expected
+def test_is_compatible(first, second, expected):
+    assert first.is_compatible(second) == expected
+    assert second.is_compatible(first) == expected
 
 
 @pytest.mark.parametrize('label, expected', [
@@ -47,42 +47,61 @@ def test_double_invert(label):
     assert -(-label) == label
 
 
-@pytest.mark.parametrize('label1, label2, expected', [
+@pytest.mark.parametrize('first, second, expected', [
     (Label('F4-F8'), Label('F8-T4'), Label('F4-T4')),
     (Label('F8'), Label('-T4'), Label('F8-T4')),
     (Label('-F8'), Label('T4'), Label('T4-F8')),
 ])
-def test_add(label1, label2, expected):
-    assert label1 + label2 == expected
+def test_add(first, second, expected):
+    assert first + second == expected
 
 
-@pytest.mark.parametrize('label1, label2', [
+@pytest.mark.parametrize('first, second', [
     (Label('F4-F8'), Label('T8-T4')),
     (Label('F4-F8'), Label('F4-T4')),
     (Label('F4'), Label('F8')),
     (Label('-F4'), Label('-F8')),
 ])
-def test_add_raises(label1, label2):
+def test_add_raises(first, second):
     with pytest.raises(ValueError):
-        assert label1 + label2
+        assert first + second
 
 
-@pytest.mark.parametrize('label1, label2, expected', [
+@pytest.mark.parametrize('first, second, expected', [
     (Label('F4-F8'), Label('T4-F8'), Label('F4-T4')),
     (Label('F8-T4'), Label('F8-F4'), Label('F4-T4')),
     (Label('F8'), Label('F4'), Label('F8-F4')),
     (Label('-F8'), Label('-F4'), Label('F4-F8')),
 ])
-def test_sub(label1, label2, expected):
-    assert label1 - label2 == expected
+def test_sub(first, second, expected):
+    assert first - second == expected
 
 
-@pytest.mark.parametrize('label1, label2', [
+@pytest.mark.parametrize('first, second', [
     (Label('F4-F8'), Label('T8-T4')),
     (Label('F4-F8'), Label('T4-F4')),
     (Label('-F4'), Label('F8')),
     (Label('F4'), Label('-F8')),
 ])
-def test_sub_raises(label1, label2):
+def test_sub_raises(first, second):
     with pytest.raises(ValueError):
-        assert label1 - label2
+        assert first - second
+
+
+@pytest.mark.parametrize('first, second, expected', [
+    (Label('F4-F8'), Label('T4-F8'), (Label('F4-T4'), '-')),
+    (Label('F8'), Label('F4'), (Label('F8-F4'), '-')),
+    (Label('F8-F4'), Label('T4-F8'), (Label('T4-F4'), '+')),
+    (Label('-F8'), Label('F4'), (Label('F4-F8'), '+')),
+])
+def test_derive(first, second, expected):
+    assert first.derive(second) == expected
+
+
+@pytest.mark.parametrize('first, second', [
+    (Label('F4-F8'), Label('T4-T3')),
+    (Label('T4-F4'), Label('F8')),
+])
+def test_derive_raises(first, second):
+    with pytest.raises(ValueError):
+        first.derive(second)
