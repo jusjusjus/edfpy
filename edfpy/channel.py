@@ -4,6 +4,7 @@ from struct import Struct
 import numpy as np
 
 from .blob import BlobSlice
+from .label import Label
 from .field import Field, normalize, serialize
 
 
@@ -36,12 +37,13 @@ class Channel:
         return scale * (self.signal[sli] + offset)
 
     @property
-    def label(self) -> str:
+    def label(self) -> Label:
         return self._label
 
     @label.setter
     def label(self, v: str):
-        self._label = normalize(str, v)
+        n = normalize(str, v)
+        self._label = Label(n)
 
     @property
     def channel_type(self) -> str:
@@ -115,9 +117,15 @@ class Channel:
     def reserved(self, v: str):
         self._reserved = normalize(str, v)
 
+    def is_compatible(self, other: 'Channel') -> bool:
+        same_units = self.physical_dimension == other.physical_dimension
+        same_sr = self.num_samples_per_record == other.num_samples_per_record
+        compat_label = self.label.is_compatible(other.label)
+        return same_units and same_sr and compat_label
+
     @classmethod
     def read(cls, file: BinaryIO, num_channels: int) -> List['Channel']:
-        channels = [cls(i) for i in range(num_channels)]
+        channels = [cls() for i in range(num_channels)]
         for field in cls.fields:
             data = file.read(field.size * num_channels)
             format_str = (str(field.size) + "s") * num_channels
