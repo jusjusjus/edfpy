@@ -37,14 +37,14 @@ def test_has_common_parts(label1, label2, expected):
     (Label('F4'), Label('-F4')),
 ])
 def test_invert(label, expected):
-    assert ~label == expected
+    assert -label == expected
 
 
 @pytest.mark.parametrize('label', [
     Label('F4-F8'), Label('F4'), Label('-F4'),
 ])
 def test_double_invert(label):
-    assert ~(~label) == label
+    assert -(-label) == label
 
 
 @pytest.mark.parametrize('label1, label2, expected', [

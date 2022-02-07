@@ -42,7 +42,7 @@ class Label(str):
         p = self.parts
         return o.left in p or o.right in p
 
-    def __invert__(self):
+    def __neg__(self):
         return self.from_channels(self.right, self.left)
 
     @classmethod
