@@ -38,7 +38,7 @@ class Label(str):
 
         raise ValueError(f"Can't subtract {other} from {self}")
 
-    def has_common_part(self, o: 'Label') -> bool:
+    def is_compatible(self, o: 'Label') -> bool:
         p = self.parts
         return o.left in p or o.right in p
 

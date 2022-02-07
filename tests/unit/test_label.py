@@ -28,8 +28,8 @@ def test_parts_left_right(label, expected):
     (Label('-T8'), Label('T4'), True),
 ])
 def test_has_common_parts(label1, label2, expected):
-    assert label1.has_common_part(label2) == expected
-    assert label2.has_common_part(label1) == expected
+    assert label1.is_compatible(label2) == expected
+    assert label2.is_compatible(label1) == expected
 
 
 @pytest.mark.parametrize('label, expected', [
