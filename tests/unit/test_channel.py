@@ -80,3 +80,32 @@ def test_is_compatible_units(units, expected):
         'label': 'T4-T8',
     })
     assert first.is_compatible(second) == expected
+
+
+def test_derive():
+    first = Channel(**{
+        'physical_dimension': 'mV',
+        'num_samples_per_record': 20,
+        'label': 'F4-T8',
+    })
+    second = Channel(**{
+        'physical_dimension': 'mV',
+        'num_samples_per_record': 20,
+        'label': 'T4-T8',
+    })
+    first.derive(second)
+
+
+def test_derive_fails():
+    first = Channel(**{
+        'physical_dimension': 'uV',
+        'num_samples_per_record': 20,
+        'label': 'F4-T8',
+    })
+    second = Channel(**{
+        'physical_dimension': 'mV',
+        'num_samples_per_record': 20,
+        'label': 'T4-T8',
+    })
+    with pytest.raises(ValueError):
+        first.derive(second)

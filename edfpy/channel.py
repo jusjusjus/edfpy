@@ -1,14 +1,15 @@
-from typing import List, BinaryIO, Optional
+from typing import List, BinaryIO, Optional, Union
 from struct import Struct
 
 import numpy as np
 
 from .blob import BlobSlice
-from .label import Label
 from .field import Field, normalize, serialize
+from .derivation import Derivation
+from .channel_base import ChannelBase
 
 
-class Channel:
+class Channel(ChannelBase):
     fields = [
         Field('label', str, 16),
         Field('channel_type', str, 80),
@@ -35,15 +36,6 @@ class Channel:
         scale = (self.physmax - self.physmin) / (self.digimax - self.digimin)
         offset = self.physmax / scale - self.digimax
         return scale * (self.signal[sli] + offset)
-
-    @property
-    def label(self) -> Label:
-        return self._label
-
-    @label.setter
-    def label(self, v: str):
-        n = normalize(str, v)
-        self._label = Label(n)
 
     @property
     def channel_type(self) -> str:
@@ -117,10 +109,16 @@ class Channel:
     def reserved(self, v: str):
         self._reserved = normalize(str, v)
 
-    def is_compatible(self, other: 'Channel') -> bool:
+    def derive(self, other: Union['Channel', Derivation]) -> Derivation:
+        if not self.is_compatible(other):
+            raise ValueError(f"cannot derive {self} and {other}")
+
+        return Derivation(self, other)
+
+    def is_compatible(self, other: ChannelBase) -> bool:
+        compat_label = self.label.is_compatible(other.label)
         same_units = self.physical_dimension == other.physical_dimension
         same_sr = self.num_samples_per_record == other.num_samples_per_record
-        compat_label = self.label.is_compatible(other.label)
         return same_units and same_sr and compat_label
 
     @classmethod

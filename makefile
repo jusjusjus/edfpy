@@ -1,3 +1,5 @@
+check.all: check check.integration
+
 check: check.style check.types check.units
 
 check.types:

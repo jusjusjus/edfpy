@@ -2,6 +2,7 @@ from typing import List, Dict
 from datetime import datetime
 import numpy as np
 from .blob import read_blob
+from .label import Label
 from .header import Header
 from .channel import Channel
 
@@ -35,14 +36,15 @@ class Reader:
         return self.header.startdatetime
 
     def get_physical_samples(self, t0: float = 0.0, dt: float = None,
-                             labels: List[str] = None) -> Dict[str, np.ndarray]:  # noqa: E501
+                             labels: List[str] = None) -> Dict[Label, np.ndarray]:  # noqa: E501
         """returns dict of samples by label from `t0` to `t0+dt`."""
         sr = self.sampling_rates
         dt = dt or self.duration
         A = np.round(t0 * sr).astype(int)
         B = np.round((t0 + dt) * sr).astype(int)
-        return {
+        signals = {
             c.label: c[a:b]
             for c, a, b in zip(self.channels, A, B)
             if (labels is None or c.label in labels)
         }
+        return signals
