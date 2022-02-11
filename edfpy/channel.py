@@ -1,4 +1,4 @@
-from typing import List, BinaryIO, Optional, Union
+from typing import List, BinaryIO, Optional
 from struct import Struct
 
 import numpy as np
@@ -109,7 +109,7 @@ class Channel(ChannelBase):
     def reserved(self, v: str):
         self._reserved = normalize(str, v)
 
-    def derive(self, other: Union['Channel', Derivation]) -> Derivation:
+    def derive(self, other: ChannelBase) -> Derivation:
         if not self.is_compatible(other):
             raise ValueError(f"cannot derive {self} and {other}")
 
