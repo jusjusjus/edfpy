@@ -1,3 +1,5 @@
+from typing import Dict
+
 import numpy as np
 
 from .channel_base import ChannelBase
@@ -19,6 +21,11 @@ class Derivation(ChannelBase):
         """return a slice of the derivation"""
         left = self.left[sli]
         right = self.right[sli]
+        return self.op(left, right)
+
+    def choose(self, signals: Dict[str, np.ndarray]) -> np.ndarray:
+        left = self.left.choose(signals)
+        right = self.right.choose(signals)
         return self.op(left, right)
 
     @property

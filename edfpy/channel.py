@@ -37,6 +37,9 @@ class Channel(ChannelBase):
         offset = self.physmax / scale - self.digimax
         return scale * (self.signal[sli] + offset)
 
+    def choose(self, signals):
+        return signals[self.label]
+
     @property
     def channel_type(self) -> str:
         return self._channel_type
@@ -123,7 +126,7 @@ class Channel(ChannelBase):
 
     @classmethod
     def read(cls, file: BinaryIO, num_channels: int) -> List['Channel']:
-        channels = [cls() for i in range(num_channels)]
+        channels = [cls() for _ in range(num_channels)]
         for field in cls.fields:
             data = file.read(field.size * num_channels)
             format_str = (str(field.size) + "s") * num_channels

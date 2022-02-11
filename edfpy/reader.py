@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Iterable
 from datetime import datetime
 import numpy as np
 from .blob import read_blob
@@ -13,17 +13,15 @@ class Reader:
         self.filepath = filepath
         with open(filepath, 'rb') as fp:
             self.header = Header.read(fp)
-            self.channels = Channel.read(fp, self.header.num_channels)
+            channels = Channel.read(fp, self.header.num_channels)
 
+        self.channel_by_label = {c.label: c for c in channels}
+        self.basic_labels = [c.label for c in channels]
         offset = self.header.num_header_bytes
-        record_lengths = [c.num_samples_per_record for c in self.channels]
+        record_lengths = [c.num_samples_per_record for c in channels]
         blob_slices = read_blob(filepath, offset, record_lengths)
-        for channel, blob_slice in zip(self.channels, blob_slices):
+        for channel, blob_slice in zip(channels, blob_slices):
             channel.signal = blob_slice
-
-        self.sampling_rates = np.array([
-            channel.num_samples_per_record for channel in self.channels
-        ]) / self.header.record_duration
 
     @property
     def duration(self) -> int:
@@ -38,13 +36,24 @@ class Reader:
     def get_physical_samples(self, t0: float = 0.0, dt: float = None,
                              labels: List[str] = None) -> Dict[Label, np.ndarray]:  # noqa: E501
         """returns dict of samples by label from `t0` to `t0+dt`."""
-        sr = self.sampling_rates
         dt = dt or self.duration
-        A = np.round(t0 * sr).astype(int)
-        B = np.round((t0 + dt) * sr).astype(int)
-        signals = {
-            c.label: c[a:b]
-            for c, a, b in zip(self.channels, A, B)
-            if (labels is None or c.label in labels)
-        }
+        t1 = t0 + dt
+        required_labels = self.required_from_requested(labels)
+        rd = self.header.record_duration
+        signals = {}
+        for label in required_labels:
+            channel = self.channel_by_label[label]
+            sr = channel.num_samples_per_record / rd
+            a = int(np.round(t0 * sr))
+            b = int(np.round(t1 * sr))
+            signals[label] = channel[a:b]
+
         return signals
+
+    def required_from_requested(self,
+                                labels: List[str] = None) -> Iterable[Label]:
+        """returns the labels required to construct the requested"""
+        if labels is None:
+            return self.basic_labels
+
+        return map(Label, labels)
