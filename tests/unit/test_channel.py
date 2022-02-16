@@ -2,6 +2,7 @@ from io import BytesIO
 
 import pytest
 
+from edfpy.label import Label
 from edfpy.channel import Channel
 
 
@@ -109,3 +110,13 @@ def test_derive_fails():
     })
     with pytest.raises(ValueError):
         first.derive(second)
+
+
+def test_children():
+    expected = Label('F4-T8')
+    channel = Channel(**{
+        'physical_dimension': 'uV',
+        'num_samples_per_record': 20,
+        'label': str(expected),
+    })
+    assert channel.children == [expected]

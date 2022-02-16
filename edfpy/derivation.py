@@ -1,8 +1,9 @@
-from typing import Dict
+from typing import Dict, List
 
 import numpy as np
 
 from .channel_base import ChannelBase
+from .label import Label
 
 
 class Derivation(ChannelBase):
@@ -23,9 +24,9 @@ class Derivation(ChannelBase):
         right = self.right[sli]
         return self.op(left, right)
 
-    def choose(self, signals: Dict[str, np.ndarray]) -> np.ndarray:
-        left = self.left.choose(signals)
-        right = self.right.choose(signals)
+    def from_dict(self, signals: Dict[str, np.ndarray]) -> np.ndarray:
+        left = self.left.from_dict(signals)
+        right = self.right.from_dict(signals)
         return self.op(left, right)
 
     @property
@@ -39,6 +40,12 @@ class Derivation(ChannelBase):
     @property
     def num_samples_per_record(self):
         return self.left.num_samples_per_record
+
+    @property
+    def children(self) -> List[Label]:
+        children = self.left.children
+        children.extend(self.right.children)
+        return children
 
     def derive(self, other: ChannelBase) -> ChannelBase:
         if not self.is_compatible(other):

@@ -1,3 +1,7 @@
+from typing import List, Dict
+
+import numpy as np
+
 from .label import Label
 from .field import normalize
 
@@ -13,6 +17,10 @@ class ChannelBase:
         self._label = Label(n)
 
     @property
+    def children(self) -> List[Label]:
+        raise NotImplementedError
+
+    @property
     def physical_dimension(self) -> str:
         raise NotImplementedError
 
@@ -21,4 +29,7 @@ class ChannelBase:
         raise NotImplementedError
 
     def is_compatible(self, other: 'ChannelBase') -> bool:
+        raise NotImplementedError
+
+    def from_dict(self, signals_dict: Dict[str, np.ndarray]) -> np.ndarray:
         raise NotImplementedError

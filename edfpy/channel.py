@@ -1,9 +1,10 @@
-from typing import List, BinaryIO, Optional
+from typing import List, BinaryIO, Optional, Dict
 from struct import Struct
 
 import numpy as np
 
 from .blob import BlobSlice
+from .label import Label
 from .field import Field, normalize, serialize
 from .derivation import Derivation
 from .channel_base import ChannelBase
@@ -118,11 +119,18 @@ class Channel(ChannelBase):
 
         return Derivation(self, other)
 
+    @property
+    def children(self) -> List[Label]:
+        return [self.label]
+
     def is_compatible(self, other: ChannelBase) -> bool:
         compat_label = self.label.is_compatible(other.label)
         same_units = self.physical_dimension == other.physical_dimension
         same_sr = self.num_samples_per_record == other.num_samples_per_record
         return same_units and same_sr and compat_label
+
+    def from_dict(self, signals: Dict[str, np.ndarray]) -> np.ndarray:
+        return signals[self.label]
 
     @classmethod
     def read(cls, file: BinaryIO, num_channels: int) -> List['Channel']:

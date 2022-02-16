@@ -26,3 +26,8 @@ def test_common_props(derivation):
 def test_label(derivation, left_label, right_label):
     label = Label(f"{left_label}-{right_label}")
     assert derivation.label == label
+
+
+@pytest.mark.parametrize('left_label, right_label', ['F7', 'M1'])
+def test_children(derivation, left_label, right_label):
+    assert derivation.children == [left_label, right_label]
