@@ -29,7 +29,10 @@ class ChannelBase:
         raise NotImplementedError
 
     def is_compatible(self, other: 'ChannelBase') -> bool:
-        raise NotImplementedError
+        compat_label = self.label.is_compatible(other.label)
+        same_units = self.physical_dimension == other.physical_dimension
+        same_sr = self.num_samples_per_record == other.num_samples_per_record
+        return same_units and same_sr and compat_label
 
-    def from_dict(self, signals_dict: Dict[str, np.ndarray]) -> np.ndarray:
+    def from_dict(self, signals_dict: Dict[Label, np.ndarray]) -> np.ndarray:
         raise NotImplementedError

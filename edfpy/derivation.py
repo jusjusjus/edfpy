@@ -24,7 +24,7 @@ class Derivation(ChannelBase):
         right = self.right[sli]
         return self.op(left, right)
 
-    def from_dict(self, signals: Dict[str, np.ndarray]) -> np.ndarray:
+    def from_dict(self, signals: Dict[Label, np.ndarray]) -> np.ndarray:
         left = self.left.from_dict(signals)
         right = self.right.from_dict(signals)
         return self.op(left, right)

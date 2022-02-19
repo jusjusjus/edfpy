@@ -1,5 +1,6 @@
 from typing import List, Dict, Iterable
 from datetime import datetime
+from itertools import product
 import numpy as np
 from .blob import read_blob
 from .label import Label
@@ -15,13 +16,31 @@ class Reader:
             self.header = Header.read(fp)
             channels = Channel.read(fp, self.header.num_channels)
 
-        self.channel_by_label = {c.label: c for c in channels}
-        self.basic_labels = [c.label for c in channels]
         offset = self.header.num_header_bytes
         record_lengths = [c.num_samples_per_record for c in channels]
         blob_slices = read_blob(filepath, offset, record_lengths)
         for channel, blob_slice in zip(channels, blob_slices):
             channel.signal = blob_slice
+
+        self.basic_labels = [c.label for c in channels]
+        self.channel_by_label = {c.label: c for c in channels}
+        self.derivation_by_label = {
+            k: v for k, v in self.channel_by_label.items()
+        }
+
+    def compute_derivations(self):
+        channels = list(self.derivation_by_label.values())
+        for left, right in product(channels, channels):
+            if left is right or not left.is_compatible(right):
+                continue
+
+            derivation = left.derive(right)
+            if derivation.label not in self.derivation_by_label:
+                self.derivation_by_label[derivation.label] = derivation
+
+    @property
+    def labels(self):
+        return list(self.derivation_by_label.keys())
 
     @property
     def duration(self) -> int:
@@ -38,7 +57,8 @@ class Reader:
         """returns dict of samples by label from `t0` to `t0+dt`."""
         dt = dt or self.duration
         t1 = t0 + dt
-        required_labels = self.required_from_requested(labels)
+        labels1 = list(map(Label, labels)) if labels else self.basic_labels
+        required_labels = self.required_from_requested(labels1)
         rd = self.header.record_duration
         signals = {}
         for label in required_labels:
@@ -48,12 +68,12 @@ class Reader:
             b = int(np.round(t1 * sr))
             signals[label] = channel[a:b]
 
-        return signals
+        return {
+            ll: self.derivation_by_label[ll].from_dict(signals)
+            for ll in labels1
+        }
 
-    def required_from_requested(self,
-                                labels: List[str] = None) -> Iterable[Label]:
-        """returns the labels required to construct the requested"""
-        if labels is None:
-            return self.basic_labels
-
-        return map(Label, labels)
+    def required_from_requested(self, labels: List[Label]) -> Iterable[Label]:
+        """returns the labels required to construct the requested signals"""
+        for label in labels:
+            yield from self.derivation_by_label[label].children
