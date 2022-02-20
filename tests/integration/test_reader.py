@@ -28,7 +28,7 @@ def test_startdatetime(sample_filepath, startdatetime):
 
 @pytest.mark.parametrize('filename, channel', [
     ('sample.edf', 'Fp2-F4'),
-    ('sample2.edf', 'C4-A1'),
+    ('sample2.edf', 'C4-M1'),
 ])
 def test_get_physical_samples_subset(sample_filepath, channel):
     """test Reader.startdatetime"""
