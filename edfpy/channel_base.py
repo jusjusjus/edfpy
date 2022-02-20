@@ -13,8 +13,8 @@ class ChannelBase:
 
     @label.setter
     def label(self, v: str):
-        n = normalize(str, v)
-        self._label = Label(n)
+        n = normalize(Label, v)
+        self._label = n
 
     @property
     def children(self) -> List[Label]:

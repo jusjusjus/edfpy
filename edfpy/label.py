@@ -33,17 +33,17 @@ class Label(str):
 
     def __add__(self, other: 'Label') -> 'Label':  # type: ignore
         if self.right == other.left:
-            return self.from_channels(self.left, other.right)
+            return self.construct(self.left, other.right)
         elif self.left == other.right:
-            return self.from_channels(other.left, self.right)
+            return self.construct(other.left, self.right)
 
         raise ValueError(f"Can't add {self} and {other}")
 
     def __sub__(self, other: 'Label') -> 'Label':
         if self.left == other.left:
-            return self.from_channels(other.right, self.right)
+            return self.construct(other.right, self.right)
         elif self.right == other.right:
-            return self.from_channels(self.left, other.left)
+            return self.construct(self.left, other.left)
 
         raise ValueError(f"Can't subtract {other} from {self}")
 
@@ -52,10 +52,10 @@ class Label(str):
         return o.left in p or o.right in p
 
     def __neg__(self):
-        return self.from_channels(self.right, self.left)
+        return self.construct(self.right, self.left)
 
     @classmethod
-    def from_channels(cls, c1: Optional[str], c2: Optional[str]) -> 'Label':
-        left: str = c1 or ''
-        right: str = f"-{c2}" if c2 else ''
+    def construct(cls, ls: Optional[str], rs: Optional[str]) -> 'Label':
+        left: str = ls or ''
+        right: str = f"-{rs}" if rs else ''
         return cls(f"{left}{right}")

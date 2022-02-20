@@ -18,11 +18,8 @@ def normalize(dtype, value: Union[str, bytes]):
                 return str(value, 'ascii')
             except BaseException:
                 return str(value, 'latin1')
-        else:
-            return value
 
-    else:
-        return dtype(value)
+    return dtype(value)
 
 
 def serialize(value, size):

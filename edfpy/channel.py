@@ -128,7 +128,7 @@ class Channel(ChannelBase):
         channels = [cls() for _ in range(num_channels)]
         for field in cls.fields:
             data = file.read(field.size * num_channels)
-            format_str = (str(field.size) + "s") * num_channels
+            format_str = (str(field.size) + 's') * num_channels
             values = Struct(format_str).unpack(data)
             normalized = (normalize(field.type, v) for v in values)
             for c, v in zip(channels, normalized):
