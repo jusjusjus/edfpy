@@ -12,7 +12,7 @@ from edfpy.reader import Reader
 ])
 def test_duration(sample_filepath, duration):
     """test Reader.duration"""
-    reader = Reader(sample_filepath)
+    reader = Reader.open(sample_filepath)
     assert reader.duration == duration
 
 
@@ -22,7 +22,7 @@ def test_duration(sample_filepath, duration):
 ])
 def test_startdatetime(sample_filepath, startdatetime):
     """test Reader.startdatetime"""
-    reader = Reader(sample_filepath)
+    reader = Reader.open(sample_filepath)
     assert reader.startdatetime == startdatetime
 
 
@@ -33,7 +33,7 @@ def test_startdatetime(sample_filepath, startdatetime):
 def test_get_physical_samples_subset(sample_filepath, channel):
     """test Reader.startdatetime"""
     expected = [channel]
-    reader = Reader(sample_filepath)
+    reader = Reader.open(sample_filepath)
     signals = reader.get_physical_samples(labels=expected)
     assert set(signals.keys()) == set(expected)
     other = reader.get_physical_samples()
@@ -43,7 +43,7 @@ def test_get_physical_samples_subset(sample_filepath, channel):
 @pytest.mark.parametrize('filename', ['sample.edf', 'sample2.edf'])
 def test_get_physical_samples(sample_filepath, sample_data):
     """test Reader.startdatetime"""
-    reader = Reader(sample_filepath)
+    reader = Reader.open(sample_filepath)
     signals = reader.get_physical_samples()
     assert set(signals.keys()) == set(sample_data.columns)
     for label, expected in sample_data.items():
@@ -56,7 +56,7 @@ def test_get_physical_samples(sample_filepath, sample_data):
 def test_get_physical_samples_in_range(sample_filepath, sample_data):
     """test Reader.startdatetime"""
     t0, dt = 1.0, 0.503  # seconds
-    reader = Reader(sample_filepath)
+    reader = Reader.open(sample_filepath)
     signals = reader.get_physical_samples(t0, dt)
     assert set(signals.keys()) == set(sample_data.columns)
     for label, data in sample_data.items():

@@ -9,24 +9,29 @@ from .channel import Channel
 
 
 class Reader:
-    def __init__(self, filepath: str):
+    def __init__(self, header: Header, channels: List[Channel]):
         """initialize reader with a filepath"""
-        self.filepath = filepath
-        with open(filepath, 'rb') as fp:
-            self.header = Header.read(fp)
-            channels = Channel.read(fp, self.header.num_channels)
-
-        offset = self.header.num_header_bytes
-        record_lengths = [c.num_samples_per_record for c in channels]
-        blob_slices = read_blob(filepath, offset, record_lengths)
-        for channel, blob_slice in zip(channels, blob_slices):
-            channel.signal = blob_slice
-
+        self.header = header
         self.basic_labels = [c.label for c in channels]
         self.channel_by_label = {c.label: c for c in channels}
         self.derivation_by_label = {
             k: v for k, v in self.channel_by_label.items()
         }
+        self.compute_derivations()
+
+    @classmethod
+    def open(cls, filepath: str) -> 'Reader':
+        with open(filepath, 'rb') as fp:
+            header = Header.read(fp)
+            channels = Channel.read(fp, header.num_channels)
+
+        offset = header.num_header_bytes
+        record_lengths = [c.num_samples_per_record for c in channels]
+        blob_slices = read_blob(filepath, offset, record_lengths)
+        for channel, blob_slice in zip(channels, blob_slices):
+            channel.signal = blob_slice
+
+        return cls(header, channels)
 
     def compute_derivations(self):
         channels = list(self.derivation_by_label.values())
