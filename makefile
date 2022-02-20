@@ -12,10 +12,10 @@ check.units:
 	python -m pytest tests/unit -x
 
 check.integration:
-	-unzip examples/sample.csv.zip -d examples
-	-unzip examples/sample2.csv.zip -d examples
+	-unzip edfs/sample.csv.zip -d edfs
+	-unzip edfs/sample2.csv.zip -d edfs
 	python -m pytest tests/integration
-	-rm examples/*csv
+	-rm edfs/*csv
 
 install.dev:
 	pip install \
