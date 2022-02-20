@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2022-02-20
+
+### Added
+
+- Reader API to read EDF files with minimal memory footprint
+
+### Removed
+
+- `EDF`
+- `Header.build_channel_differences()`
+
 ## [0.1.1] - 2022-01-29
 
 ### Added
@@ -23,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - add built channel differences also to `.sampling_rate_by_label`
 
 
-[Unreleased]: https://github.com/jusjusjus/edfpy/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/jusjusjus/edfpy/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/jusjusjus/edfpy/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/jusjusjus/edfpy/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/jusjusjus/edfpy/releases/tag/v0.1.0
