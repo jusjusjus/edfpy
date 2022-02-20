@@ -14,9 +14,7 @@ class Reader:
         self.header = header
         self.basic_labels = [c.label for c in channels]
         self.channel_by_label = {c.label: c for c in channels}
-        self.derivation_by_label = {
-            k: v for k, v in self.channel_by_label.items()
-        }
+        self.derivation_by_label = dict(self.channel_by_label.items())
         self.compute_derivations()
 
     @classmethod
