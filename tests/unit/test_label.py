@@ -3,6 +3,19 @@ import pytest
 from edfpy.label import Label
 
 
+@pytest.mark.parametrize('original, left, right', [
+    ('EEG f4-A1', 'F4', 'M1'),
+    ('EMG FP1/A1', 'Fp1', 'M1'),
+])
+def test_init_normalization(original, left, right):
+    """test norm of input str during initialization"""
+    label = Label(original)
+    assert label.original == original
+    assert label.left == left
+    assert label.right == right
+    assert label == f"{label.left}-{label.right}"
+
+
 @pytest.mark.parametrize('label, expected', [
     ('F4-F8', ['F4', 'F8']),
     ('F4', ['F4', None]),

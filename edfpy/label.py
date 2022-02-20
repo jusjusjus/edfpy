@@ -1,9 +1,28 @@
 from typing import Optional, Tuple
-
 from .cached_property import cached_property
+from .notation import synonyms
 
 
 class Label(str):
+    def __init__(self, original: str):
+        """initialize Label with `.original` storing input str"""
+        self.original = original
+
+    def __new__(cls, original: str):
+        """normalize original input str in new instance"""
+        normalized = cls.normalize(original)
+        return super().__new__(cls, normalized)
+
+    @classmethod
+    def normalize(cls, original: str) -> str:
+        split = original.replace('/', '-').upper().split(' ')
+        label = split[1] if 1 < len(split) else split[0]
+        synonym_tuple = (
+            synonyms.get(part, part)
+            for part in label.split('-')
+        )
+        return '-'.join(synonym_tuple)
+
     @property
     def left(self) -> Optional[str]:
         return self.parts[0]
