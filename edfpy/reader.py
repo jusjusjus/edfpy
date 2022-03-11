@@ -25,7 +25,8 @@ class Reader:
 
         offset = header.num_header_bytes
         record_lengths = [c.num_samples_per_record for c in channels]
-        blob_slices = read_blob(filepath, offset, record_lengths)
+        blob_slices = read_blob(filepath, offset, record_lengths,
+                                header.filetype)
         for channel, blob_slice in zip(channels, blob_slices):
             channel.signal = blob_slice
 

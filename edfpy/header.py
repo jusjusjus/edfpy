@@ -85,6 +85,10 @@ class Header:
         self._reserved = normalize(str, v)
 
     @property
+    def filetype(self) -> str:
+        return 'EDF' if self.reserved == '' else self.reserved
+
+    @property
     def num_records(self) -> int:
         """returns number of records"""
         return self._num_records

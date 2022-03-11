@@ -32,7 +32,16 @@ class BlobSlice:
         return f"BlobSlice({self[:]})"
 
 
-def read_blob(file, offset: int, record_lengths: List[int]):
+def read_blob(file, offset: int, record_lengths: List[int],
+              filetype: str) -> List[BlobSlice]:
+    if filetype == 'EDF':
+        return read_edf_blob(file, offset, record_lengths)
+
+    raise ValueError(f"File of type {filetype} not supported")
+
+
+def read_edf_blob(file, offset: int,
+                  record_lengths: List[int]) -> List[BlobSlice]:
     memarr = np.memmap(file, dtype='<i2',  # type: ignore
                        mode='r', offset=offset)
     pos = np.cumsum([0] + record_lengths).astype(int)

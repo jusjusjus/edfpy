@@ -23,7 +23,7 @@ def test_read_blob(tmp_path):
         blob = blob_from_arrays(expected_signals, record_lengths)
         fp.write(blob)
 
-    signals = read_blob(filepath, 0, record_lengths)
+    signals = read_blob(filepath, 0, record_lengths, 'EDF')
     for signal, expected in zip(signals, expected_signals):
         assert np.all(signal == expected)
 
@@ -39,7 +39,7 @@ def test_write_blob(tmp_path):
     with open(filepath, 'wb') as fp:
         write_blob(fp, expected_signals, record_lengths)
 
-    signals = read_blob(filepath, 0, record_lengths)
+    signals = read_blob(filepath, 0, record_lengths, 'EDF')
     for signal, expected in zip(signals, expected_signals):
         assert np.all(signal == expected)
 
@@ -60,7 +60,7 @@ def test_blob_slice_slices(tmp_path):
         blob = blob_from_arrays(signals, record_lengths)
         fp.write(blob)
 
-    signals = read_blob(filepath, 0, record_lengths)
+    signals = read_blob(filepath, 0, record_lengths, 'EDF')
     bslice = signals[1]
     slices = [
         slice(None),
