@@ -26,6 +26,12 @@ def test_read(test_header_bytes):
     assert fields.startdatetime == expected_dt
 
 
+def test_read_edfp(test_edfp_header_bytes):
+    file = BytesIO(test_edfp_header_bytes)
+    fields = Header.read(file)
+    assert fields.filetype == 'EDF+C'
+
+
 def test_write(test_header_bytes):
     expected = {
         'version': '0',
