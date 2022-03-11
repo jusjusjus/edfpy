@@ -21,7 +21,7 @@ class Reader:
     def open(cls, filepath: str) -> 'Reader':
         with open(filepath, 'rb') as fp:
             header = Header.read(fp)
-            channels = Channel.read(fp, header.num_channels)
+            channels = Channel.read(fp, header.num_channels, header.filetype)
 
         offset = header.num_header_bytes
         record_lengths = [c.num_samples_per_record for c in channels]

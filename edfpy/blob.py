@@ -34,7 +34,7 @@ class BlobSlice:
 
 def read_blob(file, offset: int, record_lengths: List[int],
               filetype: str) -> List[BlobSlice]:
-    if filetype == 'EDF':
+    if filetype.startswith('EDF'):
         return read_edf_blob(file, offset, record_lengths)
 
     raise ValueError(f"File of type {filetype} not supported")
