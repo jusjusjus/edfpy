@@ -2,8 +2,8 @@ from typing import List, Dict
 
 import numpy as np
 
-from .label import Label
-from .field import normalize
+from ..label import Label
+from ..field import normalize
 
 
 class ChannelBase:

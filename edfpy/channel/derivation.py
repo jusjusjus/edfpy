@@ -3,7 +3,7 @@ from typing import Dict, List
 import numpy as np
 
 from .channel_base import ChannelBase
-from .label import Label
+from ..label import Label
 
 
 class Derivation(ChannelBase):
