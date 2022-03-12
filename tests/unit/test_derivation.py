@@ -1,6 +1,5 @@
 import pytest
-from edfpy.label import Label
-from edfpy.channel import Channel
+from edfpy.channel import Channel, Label
 
 common_props = {
     'channel_type': 'EEG',

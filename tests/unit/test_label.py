@@ -1,6 +1,6 @@
 import pytest
 
-from edfpy.label import Label
+from edfpy.channel import Label
 
 
 @pytest.mark.parametrize('original, left, right', [

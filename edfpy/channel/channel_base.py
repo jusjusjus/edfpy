@@ -2,7 +2,7 @@ from typing import List, Dict
 
 import numpy as np
 
-from ..label import Label
+from .label import Label
 from ..field import normalize
 
 

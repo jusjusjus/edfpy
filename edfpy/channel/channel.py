@@ -4,8 +4,8 @@ from struct import Struct
 import numpy as np
 
 from ..blob import BlobSlice
-from ..label import Label
 from ..field import Field, normalize, serialize
+from .label import Label
 from .derivation import Derivation
 from .channel_base import ChannelBase
 

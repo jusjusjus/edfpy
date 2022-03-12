@@ -3,9 +3,8 @@ from datetime import datetime
 from itertools import product
 import numpy as np
 from .blob import read_blob
-from .label import Label
 from .header import Header
-from .channel import Channel
+from .channel import Channel, Label
 
 
 class Reader:

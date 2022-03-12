@@ -1,8 +1,7 @@
 from datetime import datetime
-from edfpy.label import Label
 from edfpy.header import Header
 from edfpy.reader import Reader
-from edfpy.channel import Channel
+from edfpy.channel import Channel, Label
 
 
 def test_duration():

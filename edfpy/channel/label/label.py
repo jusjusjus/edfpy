@@ -1,5 +1,5 @@
 from typing import Optional, Tuple
-from .cached_property import cached_property
+from ...cached_property import cached_property
 from .notation import synonyms
 
 
