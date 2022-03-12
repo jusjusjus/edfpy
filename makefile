@@ -12,8 +12,10 @@ check.units:
 	python -m pytest tests/unit -x
 
 check.integration:
+	-rm edfs/*csv
 	-unzip edfs/sample.csv.zip -d edfs
 	-unzip edfs/sample2.csv.zip -d edfs
+	-unzip edfs/edfp-sample.csv.zip -d edfs
 	python -m pytest tests/integration
 	-rm edfs/*csv
 

@@ -126,7 +126,8 @@ class Channel(ChannelBase):
         return [self.label]
 
     @classmethod
-    def read(cls, file: BinaryIO, num_channels: int, filetype: str = 'EDF') -> List['Channel']:
+    def read(cls, file: BinaryIO, num_channels: int,
+             filetype: str = 'EDF') -> List['Channel']:
         channels = [cls() for _ in range(num_channels)]
         if filetype.startswith('EDF+'):
             channels.pop()
